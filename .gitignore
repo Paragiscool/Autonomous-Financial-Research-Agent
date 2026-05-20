@@ -14,3 +14,10 @@ __pycache__/
 # IDE
 .vscode/
 .idea/
+
+# ChromaDB local database
+chroma_db/
+
+# Local project notes and PDFs (not for submission)
+project_info/
+*.pdf
