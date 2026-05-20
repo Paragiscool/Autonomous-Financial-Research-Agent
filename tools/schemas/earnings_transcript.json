@@ -1,0 +1,26 @@
+{
+  "type": "function",
+  "function": {
+    "name": "earnings_transcript",
+    "description": "Retrieves earnings call transcript for a specific company, quarter, and year.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ticker": {
+          "type": "string",
+          "description": "The stock ticker symbol of the company."
+        },
+        "quarter": {
+          "type": "string",
+          "enum": ["Q1", "Q2", "Q3", "Q4"],
+          "description": "The fiscal quarter."
+        },
+        "year": {
+          "type": "integer",
+          "description": "The 4-digit fiscal year."
+        }
+      },
+      "required": ["ticker", "quarter", "year"]
+    }
+  }
+}

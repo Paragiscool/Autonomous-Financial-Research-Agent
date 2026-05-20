@@ -1,0 +1,25 @@
+{
+  "type": "function",
+  "function": {
+    "name": "web_search",
+    "description": "Performs web search for current news, analysis, and commentary about a company or financial topic.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "query": {
+          "type": "string",
+          "description": "The search query to look up on the web."
+        },
+        "num_results": {
+          "type": "integer",
+          "description": "The number of search results to return (default 10)."
+        },
+        "date_range": {
+          "type": "string",
+          "description": "Optional date range for the search results (e.g., 'last 24 hours', 'past week')."
+        }
+      },
+      "required": ["query"]
+    }
+  }
+}

@@ -1,0 +1,178 @@
+--- PAGE 36 ---
+ 
+ 
+ 
+ 
+B4.3 The Agent Trace Review 
+Learning From Agent Behaviour: 
+One of the most valuable aspects of the simulation is the ability to review complete agent traces – the 
+full log of every Thought, Action, and Observation the agent generated during a research task. Trace 
+review reveals: (1) where the agent made good decisions (selecting the right tool, identifying 
+contradictions, recovering from errors), (2) where it made poor decisions (unnecessary tool calls, 
+missed information, circular reasoning), and (3) where it demonstrated emergent behaviours not 
+explicitly programmed (creative search strategies, unprompted cross-referencing, adaptive planning). 
+ 
+You must curate a Trace Gallery of 5-8 interesting traces that demonstrate your agent's capabilities 
+and learning moments. Each trace should be annotated with commentary explaining what the agent 
+did well and what could be improved. This Trace Gallery is a key deliverable assessed in Category 6 
+of the rubric. 
+ 
+B4.4 Progression Unlocks 
+Capability Unlocks Based On Performance: 
+As your agent progresses through the challenges, successful completion unlocks additional 
+capabilities: 
+●​ After Challenge 2: The agent gains access to the earnings_transcript tool (simulating the firm 
+purchasing an earnings transcript API subscription after seeing the agent's potential). 
+●​ After Challenge 4: The agent gains access to the peer_comparison tool (the firm builds a peer 
+analysis module after the agent demonstrates sector-level thinking). 
+●​ After Challenge 6: The agent gains access to the calculation_engine tool (the firm trusts the 
+agent enough to let it perform original calculations rather than only retrieving pre-computed 
+data). 
+●​ After Challenge 7: The agent's long-term memory is pre-populated with a corpus of 500 
+industry research summaries (simulating the firm granting access to its proprietary research 
+archive). 
+These unlocks are designed to mirror real-world scenarios where access to data sources and 
+capabilities is earned through demonstrated competence. Your implementation should handle the 
+dynamic addition of tools to the registry without requiring code changes. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 36 
+ 
+
+
+--- PAGE 37 ---
+ 
+ 
+ 
+ 
+PART C: CASE STUDIES AND REAL-WORLD APPLICATIONS 
+CASE STUDY 1: BLOOMBERG'S AI-POWERED RESEARCH TERMINAL 
+ 
+C1.1 Background 
+Bloomberg LP, the dominant provider of financial data terminals serving over 325,000 subscribers 
+globally, began integrating AI capabilities into its terminal platform in 2023 with the development of 
+BloombergGPT, a 50-billion parameter language model trained specifically on financial data. This 
+case study examines how Bloomberg's approach to AI-powered research illustrates key principles of 
+agentic system design. 
+ 
+C1.2 Architectural Decisions 
+Domain-Specific Pre-Training: 
+Bloomberg chose to train a custom LLM rather than using a general-purpose model like GPT-4. The 
+rationale was that financial language has specialized terminology, conventions, and patterns that 
+general-purpose models handle less effectively. For example, the term 'spread' has different meanings 
+in fixed income (yield spread), options (bid-ask spread), and credit (CDS spread) contexts. A 
+domain-specific model can disambiguate based on surrounding context more accurately. 
+ 
+Tool Integration Approach: 
+Bloomberg's AI features are tightly integrated with its existing data infrastructure, which includes 
+real-time market data feeds, a proprietary news service with over 2,700 journalists, a filing database 
+covering 80+ countries, and structured financial data on 50+ million instruments. Each of these data 
+sources functions as a tool that the AI system can query, similar to the tool registry pattern described 
+in Section A2. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 37 
+ 
+
+
+--- PAGE 38 ---
+ 
+ 
+ 
+ 
+C1.3 Lessons For Your Agent 
+●​ Lesson 1: Domain-specific training or fine-tuning significantly improves agent performance in 
+specialized fields like finance. 
+●​ Lesson 2: The value of an agent is directly proportional to the quality and breadth of its tool 
+integrations. 
+●​ Lesson 3: Source reliability weighting (Bloomberg's proprietary data vs. third-party sources) 
+must be explicit in the agent's reasoning. 
+●​ Lesson 4: Professional financial users demand transparency about data provenance. Every 
+claim must be traceable to a source. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 38 
+ 
+
+
+--- PAGE 39 ---
+ 
+ 
+ 
+ 
+CASE STUDY 2: KENSHO ANALYTICS (S&P GLOBAL) 
+C2.1 Background 
+Kensho Technologies, acquired by S&P Global for $550 million in 2018, pioneered the use of natural 
+language processing for financial analysis. Their platform, NERD (Named Entity Recognition and 
+Disambiguation), can parse unstructured financial text and extract structured data about companies, 
+events, and relationships. This case study focuses on their approach to multi-source synthesis. 
+ 
+C2.2 The Synthesis Architecture 
+Event-Driven Analysis: 
+Kensho's core innovation was event-driven analysis: rather than analyzing companies in isolation, 
+their system identifies events (earnings releases, regulatory actions, management changes, product 
+launches) and traces the impact of those events across multiple data sources. When a CEO announces 
+a surprise departure, the system simultaneously: (1) retrieves historical performance data to assess the 
+CEO's track record, (2) searches for successor candidates in board filings, (3) analyzes market 
+reaction in real-time data, (4) identifies precedent events in similar companies, and (5) generates a 
+comprehensive impact assessment. 
+ 
+C2.3 Lessons For Your Agent 
+●​ Lesson 1: Event-driven architecture can trigger more comprehensive research than 
+query-driven architecture alone. 
+●​ Lesson 2: Named entity recognition and disambiguation are critical preprocessing steps for 
+financial text analysis. 
+●​ Lesson 3: Cross-referencing the same event across multiple sources reveals different facets of 
+its impact. 
+●​ Lesson 4: Speed matters in financial research. Kensho's system produces event analyses within 
+minutes, not hours. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 39 
+ 
+
+
+--- PAGE 40 ---
+ 
+ 
+ 
+ 
+CASE STUDY 3: ALPHA RESEARCH LABS (HYPOTHETICAL) 
+C3.1 Scenario 
+Alpha Research Labs is a mid-tier quantitative hedge fund that attempted to build an autonomous 
+research agent using open-source tools (LangChain, GPT-4, Pinecone) during 2024. This case study is 
+based on composite experiences from multiple real organizations and illustrates common architectural 
+mistakes and their consequences. 
+ 
+C3.2 The Failed First Attempt 
+Architecture: Naive React Loop: 
+Alpha Research Labs' first agent used a simple ReAct loop with five tools: web search, a financial 
+data API, SEC filing retrieval, a news API, and a report generator. The system prompt was a single 
+paragraph instructing the agent to 'research companies thoroughly and produce professional reports.' 
+ 
+What Went Wrong: 
+●​ Hallucination rate of 23%: Without explicit verification steps, the agent frequently generated 
+plausible but incorrect financial figures. In one case, it reported that Amazon's operating 
+margin was 18.5% when the actual figure from their 10-K was 5.3%. Note: Industry average 
+hallucination rates for unverified financial agents are typically around 45-60%. 
+●​ Tool over-reliance: The agent called web_search for almost every query, even when structured 
+data from the financial API would have been more accurate and efficient. 
+●​ No error recovery: When the SEC API timed out, the agent simply skipped the filing analysis 
+entirely, producing reports with critical gaps. 
+●​ Context 
+window 
+overflow: 
+For 
+comprehensive 
+research 
+tasks, the accumulated 
+Thought-Action-Observation trace exceeded the model's context window, causing the agent to 
+lose track of earlier findings. 
+●​ No memory: Each research session started from scratch, meaning the agent could not leverage 
+previously gathered industry knowledge. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 40 
+ 
+
+

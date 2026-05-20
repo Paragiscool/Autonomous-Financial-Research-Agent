@@ -1,0 +1,290 @@
+--- PAGE 6 ---
+ 
+ 
+ 
+ 
+A1.4 Plan-And-Execute Architecture 
+Separating Planning From Execution: 
+An alternative to ReAct is the Plan-and-Execute pattern, where the agent first creates a complete 
+research plan before taking any actions. This approach is often more efficient for complex, multi-step 
+research tasks because it reduces redundant tool calls and provides a clear roadmap that can be 
+reviewed before execution begins. 
+In Plan-and-Execute, the Planner LLM generates a structured plan with numbered steps, expected 
+outputs for each step, and dependencies between steps. The Executor then works through the plan step 
+by step, updating the plan if intermediate results reveal the need for additional research or if a planned 
+step becomes unnecessary. 
+ 
+Plan-And-Execute Example: 
+User Query: 'Compare the competitive positions of JPMorgan, 
+  Goldman Sachs, and Morgan Stanley in investment banking.' 
+ 
+PLAN: 
+Step 1: Retrieve latest 10-K filings for JPM, GS, MS 
+Step 2: Extract revenue breakdown by business segment 
+Step 3: Get league table rankings for M&A and ECM 
+Step 4: Analyze earnings call transcripts for strategic priorities 
+Step 5: Search news for recent deals and market share shifts 
+Step 6: Calculate key financial ratios (ROE, efficiency ratio) 
+Step 7: Synthesize into comparative analysis report 
+ 
+The advantage of this approach is visibility: a human reviewer can inspect the plan before execution 
+and suggest modifications. The disadvantage is rigidity: if Step 1 reveals that Morgan Stanley has 
+restructured its segments, the original plan may need significant revision. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 6 
+ 
+
+
+--- PAGE 7 ---
+ 
+ 
+ 
+ 
+SECTION A2: TOOL ORCHESTRATION AND REGISTRY DESIGN 
+A2.1 What Is A Tool In An Agentic System? 
+Tool Definition: 
+In the agentic AI paradigm, a 'tool' is any external capability that the agent can invoke to interact with 
+the world beyond its own language model. Tools bridge the gap between the LLM's reasoning ability 
+and the real-world data and systems it needs to access. Each tool is defined by a name, a description 
+(which the LLM reads to decide when to use it), an input schema (specifying required and optional 
+parameters with their types), and an output schema (defining the structure of returned data). 
+The quality of tool definitions directly impacts agent performance. A vaguely described tool will be 
+invoked inappropriately; an overly restrictive description will cause the agent to miss opportunities to 
+use it. Writing effective tool descriptions is itself a form of prompt engineering. 
+ 
+A2.2 The Tool Registry 
+Registry Architecture: 
+The tool registry is the central catalog of all tools available to the agent. It serves three purposes: (1) it 
+provides the LLM with the metadata it needs to select appropriate tools during the Thought step, (2) it 
+manages the execution layer that routes tool calls to the correct API endpoints or functions, and (3) it 
+handles authentication, rate limiting, error handling, and result caching. 
+Your agent must implement a minimum of 10 tools. Below is the reference tool registry with detailed 
+specifications for each tool: 
+ 
+Tool Name 
+Description 
+Input Schema 
+Output 
+sec_filing_search 
+Retrieves SEC filings 
+(10-K, 10-Q, 8-K, DEF 
+14A) from EDGAR for 
+a given company ticker 
+and filing type 
+ticker: str, 
+filing_type: str, year: 
+int (optional) 
+Filing text, filing 
+date, accession 
+number 
+web_search 
+Performs web search for 
+current news, analysis, 
+and commentary about a 
+company or financial 
+topic 
+query: str, 
+num_results: int 
+(default 10), 
+date_range: str 
+(optional) 
+List of URL, title, 
+snippet tuples 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 7 
+ 
+
+
+--- PAGE 8 ---
+ 
+ 
+ 
+ 
+earnings_transcript Retrieves earnings call 
+transcript for a specific 
+company, quarter, and 
+year 
+ticker: str, quarter: str 
+(Q1-Q4), year: int 
+Full transcript text 
+with speaker labels 
+financial_data_api 
+Retrieves structured 
+financial data including 
+income statement, 
+balance sheet, cash 
+flow, and key ratios 
+ticker: str, 
+statement_type: str, 
+period: str 
+(annual/quarterly), 
+years: int 
+JSON of financial 
+statement data 
+news_sentiment 
+Analyzes sentiment of 
+recent news articles 
+about a company or 
+topic using NLP 
+query: str, 
+num_articles: int, 
+lookback_days: int 
+Sentiment scores, 
+article summaries, 
+overall sentiment 
+vector_db_search 
+Searches the agent's 
+long-term memory 
+(vector database) for 
+previously researched 
+information 
+query: str, top_k: int, 
+filter: dict (optional) 
+Relevant document 
+chunks with 
+similarity scores 
+vector_db_store 
+Stores new research 
+findings in the agent's 
+long-term memory for 
+future retrieval 
+content: str, 
+metadata: dict 
+(ticker, date, 
+source_type) 
+Storage confirmation 
+with document ID 
+company_profile 
+Retrieves basic 
+company information 
+including sector, 
+industry, market cap, 
+executives, and 
+description 
+ticker: str 
+Structured company 
+profile JSON 
+peer_comparison 
+Identifies peer 
+companies and retrieves 
+comparative financial 
+metrics 
+ 
+ticker: str, 
+num_peers: int, 
+metrics: list[str] 
+Peer comparison 
+matrix with rankings 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 8 
+ 
+
+
+--- PAGE 9 ---
+ 
+ 
+ 
+ 
+report_generator 
+Formats researched data 
+into a structured 
+investment research 
+report following a 
+specified template 
+template: str, 
+sections: dict, 
+sources: list 
+Formatted research 
+report in markdown 
+fact_checker 
+Cross-references a 
+specific claim against 
+multiple authoritative 
+sources to verify 
+accuracy 
+claim: str, sources: 
+list[str] (optional) 
+Verification status, 
+supporting evidence, 
+confidence score 
+calculation_engine 
+Performs financial 
+calculations including 
+DCF, ratios, growth 
+rates, and statistical 
+analysis 
+calculation_type: str, 
+inputs: dict 
+Calculation result 
+with intermediate 
+steps 
+ 
+A2.3 Tool Selection Logic 
+How The Agent Chooses Tools: 
+The LLM selects tools based on a combination of the tool descriptions in the registry and the current 
+state of the research task. Tool selection is implemented through the system prompt, which includes 
+the full tool registry with descriptions. When the LLM generates a Thought step, it evaluates which 
+tool would most efficiently provide the information it needs next. 
+Effective tool selection requires the agent to consider: (1) what information is already available in its 
+current context, (2) what information is still missing, (3) which tool is most likely to provide that 
+information, (4) whether the tool has rate limits or cost implications that should influence the order of 
+operations, and (5) whether the information could be obtained from the agent's long-term memory 
+(vector database) rather than making an external API call. 
+ 
+Tool Selection Anti-Patterns: 
+●​ Redundant calls: Invoking web_search for information already available in a retrieved SEC 
+filing. The agent should check existing context before making new tool calls. 
+●​ Wrong granularity: Using financial_data_api to get a single ratio when a full financial 
+statement retrieval would provide multiple needed data points in one call. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 9 
+ 
+
+
+--- PAGE 10 ---
+ 
+ 
+ 
+ 
+●​ Missing verification: Accepting a single source's data without cross-referencing. The agent 
+should invoke fact_checker for critical numerical claims. 
+●​ Ignoring memory: Performing a full research cycle for a company the agent has already 
+researched recently. The vector_db_search tool should be checked first. 
+●​ Over-reliance on web search: Using web_search for structured data that is more accurately 
+available from financial_data_api or sec_filing_search. 
+ 
+A2.4 Tool Schema Design Principles 
+Writing Effective Tool Schemas: 
+Each tool schema must follow the OpenAI function calling specification (which is also used by 
+Anthropic's Claude tool use). The schema is a JSON object with the following required fields: name 
+(string, no spaces, descriptive), description (string, 1-3 sentences explaining when and why to use this 
+tool), parameters (JSON Schema object defining input types, required fields, and defaults). 
+ 
+Example: Well-Designed Tool Schema: 
+ 
+{ 
+  "name": "sec_filing_search", 
+  "description": "Search and retrieve SEC EDGAR filings for a 
+    publicly traded US company. Use this tool when you need 
+    official regulatory disclosures including annual reports 
+    (10-K), quarterly reports (10-Q), material event reports 
+    (8-K), or proxy statements (DEF 14A). Returns the full 
+    text of the filing.", 
+  "parameters": { 
+    "type": "object", 
+    "properties": { 
+      "ticker": { 
+        "type": "string", 
+        "description": "Stock ticker symbol (e.g., AAPL, MSFT)" 
+      }, 
+      "filing_type": { 
+        "type": "string", 
+        "enum": ["10-K", "10-Q", "8-K", "DEF 14A"], 
+        "description": "Type of SEC filing to retrieve" 
+      }, 
+      "year": { 
+        "type": "integer", 
+        "description": "Filing year (defaults to most recent)" 
+      } 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 10 
+ 
+
+

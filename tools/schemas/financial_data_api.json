@@ -1,0 +1,31 @@
+{
+  "type": "function",
+  "function": {
+    "name": "financial_data_api",
+    "description": "Retrieves structured financial data including income statement, balance sheet, cash flow, and key ratios.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ticker": {
+          "type": "string",
+          "description": "The stock ticker symbol of the company."
+        },
+        "statement_type": {
+          "type": "string",
+          "enum": ["income_statement", "balance_sheet", "cash_flow", "ratios"],
+          "description": "The type of financial statement or data to retrieve."
+        },
+        "period": {
+          "type": "string",
+          "enum": ["annual", "quarterly"],
+          "description": "The reporting period (annual or quarterly)."
+        },
+        "years": {
+          "type": "integer",
+          "description": "The number of historical years to retrieve data for."
+        }
+      },
+      "required": ["ticker", "statement_type", "period"]
+    }
+  }
+}

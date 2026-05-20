@@ -1,0 +1,17 @@
+{
+  "type": "function",
+  "function": {
+    "name": "company_profile",
+    "description": "Retrieves basic company information including sector, industry, market cap, executives, and description.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ticker": {
+          "type": "string",
+          "description": "The stock ticker symbol of the company."
+        }
+      },
+      "required": ["ticker"]
+    }
+  }
+}

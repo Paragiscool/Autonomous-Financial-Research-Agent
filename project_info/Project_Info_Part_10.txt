@@ -1,0 +1,189 @@
+--- PAGE 46 ---
+ 
+ 
+ 
+ 
+PART D: PROJECT METHODOLOGY AND DELIVERABLES 
+SECTION D1: OVERVIEW 
+Phase 
+Days 
+Focus 
+Key Deliverables 
+Foundation 
+1-3 
+Architecture design & 
+environment setup 
+Architecture doc, tool registry, 
+environment config 
+Core Build 
+4-7 
+Agent core, tools, memory 
+system 
+Working ReAct/PlanExec loop, 10+ 
+tools, vector DB 
+Integration 
+8-10 
+Multi-source synthesis & 
+error handling 
+Synthesis engine, fallback chains, fact 
+verification 
+Evaluation 
+11-13 
+Testing, benchmarking, 
+optimization 
+8 challenge outputs, evaluation metrics, 
+optimization log 
+Delivery 
+14-15 
+Documentation, 
+presentation, submission 
+Final report, architecture docs, GitHub 
+submission 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 46 
+ 
+
+
+--- PAGE 47 ---
+ 
+ 
+ 
+ 
+SECTION D2: DAILY TASK BREAKDOWN 
+Day 1: Architecture Specification And Research Plan 
+Objective: 
+Design the complete cognitive architecture of your autonomous research agent. This is the most 
+important day of the project because all subsequent work is built on the architectural decisions you 
+make today. 
+Tasks: 
+1. Read this entire project document (Parts A through F) thoroughly. Identify the 7 deliberate 
+errors and begin your ERROR_LOG.md file. 
+2. Choose your primary agent pattern: ReAct, Plan-and-Execute, or a hybrid approach. Document 
+your rationale. 
+3. Design the agent's cognitive loop: how does the agent receive a query, formulate a plan, select 
+tools, execute actions, process observations, and synthesize results? 
+4. Design the memory architecture: how will short-term, long-term (vector DB), and episodic 
+memory interact? 
+5. Create a high-level architecture diagram using Miro, draw.io, or Excalidraw. 
+6. Write the Agent Architecture Specification document (minimum 10 pages) following the 
+template provided. 
+Deliverable: 
+File: architecture_specification.md (or .pdf) in your GitHub repository 
+Architecture diagram: architecture_diagram.png (or .svg) 
+Github Commit Message Format: 
+Day-01: Agent Architecture Specification - [YourName] 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 47 
+ 
+
+
+--- PAGE 48 ---
+ 
+ 
+ 
+ 
+Day 2: Tool Registry Design And Implementation 
+Objective: 
+Design and implement the complete tool registry with a minimum of 10 tool definitions including 
+schemas, descriptions, and stub implementations. 
+Tasks: 
+1. Define JSON schemas for each of the 10+ tools following the OpenAI function calling 
+specification (see Section A2.4). 
+2. Implement the tool registry class/module that manages tool metadata, dispatches tool calls, and 
+handles tool responses. 
+3. Create stub implementations for each tool that return realistic mock data. 
+4. Implement tool validation logic that verifies input parameters against schemas before execution. 
+5. Write unit tests for the tool registry and at least 3 tool implementations. 
+Deliverable: 
+Files: tools/tool_registry.py, tools/schemas/, tests/test_tools.py 
+Day-02: Tool Registry Implementation - [YourName] 
+ 
+Day 3: Environment Setup And Llm Integration 
+Objective: 
+Set up the complete development environment including LLM API integration, vector database, and 
+project infrastructure. 
+Tasks: 
+1. Set up Python virtual environment with all required dependencies (see Part E for complete list). 
+2. Configure LLM API access (OpenAI and/or Anthropic). Implement API wrapper with retry 
+logic and token tracking. 
+3. Set up vector database (Pinecone, Weaviate, Chroma, or Qdrant). Create collection/index with 
+schema from Section A3.3. 
+4. Implement configuration management (environment variables, API keys, model parameters). 
+5. Set up logging infrastructure that captures all agent reasoning traces, tool calls, and errors. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 48 
+ 
+
+
+--- PAGE 49 ---
+ 
+ 
+ 
+ 
+6. Create the project's README.md with setup instructions that a reviewer can follow to 
+reproduce your work. 
+Deliverable: 
+Files: config/, setup.py (or pyproject.toml), requirements.txt, README.md, .env.example 
+Day-03: Environment Setup and LLM Integration - [YourName] 
+ 
+Day 4: Core Agent Loop Implementation 
+Objective: 
+Implement the core reasoning loop (ReAct or Plan-and-Execute) that drives the agent's autonomous 
+research behavior. 
+Tasks: 
+1. Implement the main agent class with the reasoning loop (Thought-Action-Observation cycle or 
+Plan-Execute-Revise cycle). 
+2. Implement the system prompt with tool registry injection. 
+3. Implement LLM response parsing to extract tool calls and reasoning traces. 
+4. Implement iteration limits and termination conditions. 
+5. Test the agent with a simple query (Challenge 1: Microsoft company profile) using mock tool 
+data. 
+Deliverable: 
+Files: agent/core.py, agent/prompts.py, agent/parser.py 
+Day-04: Core Agent Loop Implementation - [YourName] 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 49 
+ 
+
+
+--- PAGE 50 ---
+ 
+ 
+ 
+ 
+Day 5: Tool Integration With Real APIs 
+Objective: 
+Replace stub tool implementations with real API integrations for at least 5 of the 10+ tools. 
+Tasks: 
+1. Integrate SEC EDGAR API for filing retrieval (EDGAR full-text search API is free and does 
+not require authentication). 
+2. Integrate a financial data API (options: Alpha Vantage free tier, Financial Modeling Prep, 
+Yahoo Finance via yfinance library). 
+3. Integrate a web search API (options: Tavily, SerpAPI, or Brave Search API). 
+4. Integrate a news API with sentiment analysis (options: NewsAPI.org, GDELT, or build 
+sentiment scoring with TextBlob/VADER on search results). 
+5. Implement rate limiting and caching for all external API calls. 
+6. Run Challenge 1 and Challenge 2 with real API data and document results. 
+Deliverable: 
+Files: tools/sec_edgar.py, tools/financial_api.py, tools/web_search.py, tools/news_sentiment.py, 
+results/challenge_1.md, results/challenge_2.md 
+Day-05: Real API Integration - [YourName] 
+ 
+Day 6: Memory System Implementation 
+Objective: 
+Implement the complete memory architecture including short-term context management, long-term 
+vector storage, and episodic memory. 
+Tasks: 
+1. Implement the vector database integration with embedding pipeline (text chunking, embedding 
+generation, metadata tagging, storage, and retrieval). 
+2. Implement short-term memory management: context summarization when approaching context 
+window limits, selective retention of key findings. 
+3. Implement the vector_db_search and vector_db_store tools as working integrations. 
+4. Implement episodic memory: logging of successful research strategies and common error 
+patterns. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 50 
+ 
+
+

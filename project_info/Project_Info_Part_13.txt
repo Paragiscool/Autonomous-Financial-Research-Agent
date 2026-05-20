@@ -1,0 +1,196 @@
+--- PAGE 61 ---
+ 
+ 
+ 
+ 
+●​ Checkpointing: LangGraph supports state persistence, allowing the agent to save its progress 
+and resume later. 
+ 
+Example: Plan-And-Execute In Langgraph: 
+from langgraph.graph import StateGraph, END 
+from typing import TypedDict, List 
+ 
+class ResearchState(TypedDict): 
+    query: str 
+    plan: List[str] 
+    current_step: int 
+    gathered_data: dict 
+    draft_report: str 
+    verified_report: str 
+ 
+graph = StateGraph(ResearchState) 
+graph.add_node('planner', plan_research) 
+graph.add_node('executor', execute_step) 
+graph.add_node('synthesizer', synthesize_findings) 
+graph.add_node('verifier', verify_facts) 
+graph.add_node('reporter', generate_report) 
+ 
+graph.set_entry_point('planner') 
+graph.add_edge('planner', 'executor') 
+graph.add_conditional_edges('executor', 
+    should_continue, 
+    {True: 'executor', False: 'synthesizer'}) 
+graph.add_edge('synthesizer', 'verifier') 
+graph.add_edge('verifier', 'reporter') 
+graph.add_edge('reporter', END) 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 61 
+ 
+
+
+--- PAGE 62 ---
+ 
+ 
+ 
+ 
+SECTION E2: VECTOR DATABASES 
+E2.1 Options And Comparison 
+Database 
+Hosting 
+Free Tier 
+Best For 
+Pinecone 
+Managed cloud 
+100K vectors free 
+Production deployments, 
+managed scaling 
+Weaviate 
+Self-hosted or 
+cloud 
+Sandbox cluster free 
+Hybrid search (vector + 
+keyword), GraphQL API 
+Chroma 
+Local (in-process) Fully free (open source) 
+Development, prototyping, 
+small datasets 
+Qdrant 
+Self-hosted or 
+cloud 
+1GB free cluster 
+High-performance filtering, 
+Rust-based speed 
+ 
+For this project, Chroma is recommended for initial development (it runs locally with zero setup) with 
+a migration path to Pinecone or Weaviate for the final submission if you want to demonstrate cloud 
+deployment capability. 
+ 
+E2.2 Embedding Models 
+Recommended Embedding Models: 
+●​ OpenAI text-embedding-3-small: 1536 dimensions, $0.02 per million tokens. Best balance of 
+quality and cost for financial text. 
+●​ OpenAI text-embedding-3-large: 1024 dimensions, $0.13 per million tokens. Higher quality 
+but 6.5x more expensive. Use only if small model shows retrieval quality issues. 
+●​ Cohere embed-v3: 1024 dimensions, generous free tier. Good alternative if you want to avoid 
+OpenAI dependency. 
+●​ sentence-transformers/all-MiniLM-L6-v2: 384 dimensions, fully free (runs locally). Lower 
+quality but zero cost. Suitable for prototyping. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 62 
+ 
+
+
+--- PAGE 63 ---
+ 
+ 
+ 
+ 
+SECTION E3: LLM API PROVIDERS 
+E3.1 Openai 
+●​ Model: GPT-4o or GPT-4o-mini for the reasoning engine. GPT-4o-mini is recommended 
+during development to reduce costs; switch to GPT-4o for final challenge runs. 
+●​ API Key: Register at platform.openai.com. New accounts receive $5 in free credits. 
+●​ Rate Limits: GPT-4o: 500 RPM (requests per minute), 30,000 TPM (tokens per minute) on 
+free tier. 
+ 
+E3.2 Anthropic 
+●​ Model: Claude Sonnet 4 for the reasoning engine. Excellent at following complex instructions 
+and producing structured outputs. 
+●​ API Key: Register at console.anthropic.com. Free tier available with rate limits. 
+●​ Advantage: Claude's tool use API is well-suited for agent architectures and supports parallel 
+tool calls. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 63 
+ 
+
+
+--- PAGE 64 ---
+ 
+ 
+ 
+ 
+SECTION E4: DATA SOURCES AND APIS 
+E4.1 SEC EDGAR (Free, No API Key Required) 
+The SEC's EDGAR full-text search system (efts.sec.gov) provides free access to all public company 
+filings. The API supports full-text search across filings, retrieval by company ticker or CIK number, 
+and filtering by filing type and date range. Rate limit: 10 requests per second with a mandatory 
+User-Agent header identifying your application. 
+ 
+E4.2 Financial Data APIs 
+●​ Alpha Vantage: Free tier provides 25 requests per day. Covers US stocks, fundamentals, 
+earnings, and economic indicators. 
+●​ Financial Modeling Prep (FMP): Free tier provides 250 requests per day. Covers financial 
+statements, ratios, earnings transcripts, and company profiles. 
+●​ yfinance (Python library): Free, unofficial Yahoo Finance API wrapper. No rate limit 
+documentation but aggressive scraping may result in IP blocking. 
+ 
+E4.3 News And Search APIs 
+●​ Tavily: AI-optimized search API designed for agent use. Free tier: 1,000 searches per month. 
+Returns clean, structured results ideal for LLM consumption. 
+●​ SerpAPI: Google Search results API. Free tier: 100 searches per month. 
+●​ NewsAPI.org: Free tier: 100 requests per day. Good for recent news but limited to articles 
+from the past month on free tier. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 64 
+ 
+
+
+--- PAGE 65 ---
+ 
+ 
+ 
+ 
+SECTION E5: DEVELOPMENT TOOLS 
+E5.1 Required Python Packages 
+# requirements.txt 
+langchain>=0.2.0 
+langgraph>=0.1.0 
+openai>=1.30.0 
+anthropic>=0.25.0 
+chromadb>=0.4.0 
+pinecone-client>=3.0.0  # optional 
+tiktoken>=0.7.0 
+python-dotenv>=1.0.0 
+pydantic>=2.0.0 
+httpx>=0.27.0 
+tenacity>=8.2.0  # retry logic 
+rich>=13.0.0  # terminal formatting 
+pytest>=8.0.0 
+yfinance>=0.2.36 
+textblob>=0.18.0  # sentiment analysis 
+beautifulsoup4>=4.12.0  # web scraping 
+ 
+E5.2 Design And Documentation Tools 
+●​ Miro: Free tier for agent flow diagrams and architecture visualizations. URL: miro.com 
+●​ Excalidraw: Free, open-source diagramming. URL: excalidraw.com 
+●​ Notion: Free for individual use. Recommended for system design documentation. URL: 
+notion.so 
+●​ draw.io: Free diagramming tool, integrates with GitHub for version-controlled diagrams. 
+URL: draw.io 
+ 
+E5.3 AI Assistance Policy 
+Permitted Use Of AI Tools: 
+Students are encouraged to use AI assistants (ChatGPT, Claude, GitHub Copilot) throughout this 
+project. However, the following rules apply strictly: 
+1. You must understand every line of code in your submission. During the viva or code review, 
+you will be asked to explain specific sections of your code without AI assistance. 
+2. All AI-generated code must be validated against the project requirements. AI tools can produce 
+plausible but incorrect implementations. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 65 
+ 
+
+

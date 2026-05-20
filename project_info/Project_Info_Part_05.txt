@@ -1,0 +1,207 @@
+--- PAGE 21 ---
+ 
+ 
+ 
+ 
+SECTION A6: MULTI-SOURCE DATA SYNTHESIS 
+A6.1 The Synthesis Challenge 
+Why Synthesis Is The Hardest Part: 
+Gathering data from multiple sources is relatively straightforward; the real challenge is synthesizing 
+that data into a coherent narrative that adds analytical value beyond what any individual source 
+provides. Synthesis requires the agent to: (1) identify agreements and disagreements across sources, 
+(2) resolve conflicting data points by evaluating source reliability, (3) identify patterns that emerge 
+only when multiple data points are considered together, and (4) generate original analytical 
+observations that connect disparate pieces of information. 
+Consider this scenario: the agent has gathered data showing that a company's revenue grew 15% 
+year-over-year (from the 10-K), that management expressed confidence about continued growth on 
+the earnings call, but that three independent news articles report major customer contract losses. A 
+simple agent would present all three data points separately. A sophisticated agent would synthesize 
+them into an insight: the revenue growth is backward-looking and may not be sustainable given the 
+customer losses, and management's optimism may not be fully accounting for these developments. 
+ 
+A6.2 Source Reliability Hierarchy 
+Tiered Source Trustworthiness: 
+Not all sources are equally reliable, and the agent must weight information accordingly. The following 
+hierarchy should be implemented in the agent's synthesis logic: 
+1. Tier 1 (Highest Reliability): SEC filings (10-K, 10-Q) – legally mandated, audited, subject to 
+criminal penalties for misrepresentation. 
+2. Tier 2: Financial data APIs (Bloomberg, FactSet, Refinitiv) – curated from primary sources 
+with professional data quality controls. 
+3. Tier 3: Earnings call transcripts – direct management commentary but subject to spin and 
+selective disclosure. 
+4. Tier 4: Social media posts and anonymous forum discussions – crowd-sourced but unverified 
+and subject to manipulation. 
+5. Tier 5: Major news outlets (Reuters, Bloomberg News, Financial Times) – professional 
+journalism with editorial oversight but may contain errors or bias. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 21 
+ 
+
+
+--- PAGE 22 ---
+ 
+ 
+ 
+ 
+A6.3 Conflict Resolution Protocol 
+When Sources Disagree: 
+The agent must implement a systematic protocol for resolving conflicting data: 
+1. Identify the conflict: Detect when two or more sources provide different values for the same 
+data point. 
+2. Assess source tiers: Determine the reliability tier of each conflicting source. 
+3. Check for temporal differences: Conflicting data may reflect different reporting periods rather 
+than actual disagreement. 
+4. Look for restatements: Companies sometimes restate historical financials, causing older sources 
+to show different figures than newer ones. 
+5. Apply the highest-tier rule: When conflicts cannot be resolved through temporal or restatement 
+analysis, prefer the highest-tier source. 
+6. Document the conflict: Always note in the report when conflicting data was encountered and 
+how it was resolved. 
+ 
+A6.4 Synthesis Techniques 
+Narrative Threading: 
+Narrative threading connects data points from different sources into a coherent story arc. The agent 
+constructs a chronological or thematic narrative that weaves together financial data, management 
+commentary, market conditions, and analyst perspectives. Each thread should have a clear thesis 
+supported by evidence from multiple sources. 
+ 
+Quantitative Triangulation: 
+For numerical data, the agent should triangulate by comparing the same metric from at least three 
+independent sources. If two of three sources agree, the agent can report with high confidence. If all 
+three disagree, the agent should report the range and explain possible reasons for the discrepancy. 
+ 
+Sentiment-Fact Alignment: 
+The agent should compare the sentiment expressed in qualitative sources (news, earnings calls) with 
+the facts presented in quantitative sources (financial statements). Misalignment between sentiment 
+and facts is itself an analytical finding. For example, if news sentiment is overwhelmingly positive but 
+financial metrics show deteriorating margins, this divergence is worth highlighting in the report.
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 22 
+ 
+
+
+--- PAGE 23 ---
+ 
+ 
+ 
+ 
+SECTION A7: LLM PROMPT ENGINEERING FOR RESEARCH AGENTS 
+A7.1 System Prompt Design 
+The Agent's Core Instructions: 
+The system prompt is the foundation of the agent's behaviour. It defines the agent's role, its 
+capabilities, its constraints, and its output format. For a financial research agent, the system prompt 
+must be carefully crafted to: (1) establish the agent as a financial research analyst with high standards 
+for accuracy, (2) provide clear instructions on when and how to use each tool, (3) define the output 
+format and quality expectations, (4) establish guardrails against hallucination and speculation, and (5) 
+set the tone and style appropriate for professional financial research. 
+ 
+System Prompt Structure: 
+ROLE: You are an autonomous financial research agent operating 
+  at a quantitative research firm. You produce investment 
+  research reports comparable to junior analyst output. 
+ 
+CAPABILITIES: You have access to the following tools: 
+  [Tool registry injected here] 
+ 
+CONSTRAINTS: 
+  1. Never fabricate data. If you cannot find information, 
+     state that clearly in your report. 
+  2. Always cite the source for every factual claim. 
+  3. Cross-reference numerical data from at least 2 sources. 
+  4. If sources conflict, report both values and explain. 
+  5. Do not make investment recommendations or predictions. 
+  6. Maximum 20 tool calls per research task. 
+ 
+OUTPUT FORMAT: Your final output must follow the research 
+  report template with sections: Executive Summary, Company 
+  Overview, Financial Analysis, Risk Assessment, Competitive 
+  Position, and Research Methodology Notes. 
+ 
+A7.2 Prompt Patterns For Research Tasks 
+The Chain-Of-Verification Pattern: 
+This pattern forces the agent to verify its own outputs before presenting them. After generating a draft 
+section, the agent re-reads it and identifies any claims that need verification, then invokes tools to 
+verify those specific claims before finalizing the section. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 23 
+ 
+
+
+--- PAGE 24 ---
+ 
+ 
+ 
+ 
+The Structured Output Pattern: 
+Financial research requires structured outputs with specific sections, tables, and data formats. The 
+prompt should include an explicit output schema that the agent must follow, including required 
+section headers, table formats for financial data, and citation formats. 
+ 
+The Self-Reflection Pattern: 
+After completing its research plan, the agent generates a self-assessment: What information gaps 
+remain? Which sections are weaker than others? Which claims have the lowest confidence? This 
+self-reflection can trigger additional research cycles to strengthen weak sections before finalizing the 
+report. 
+ 
+A7.3 Handling Ambiguous Queries 
+Query Disambiguation: 
+Financial research queries are often ambiguous. A query like 'Analyze Amazon' could mean analyze 
+Amazon the e-commerce company or Amazon the AWS cloud provider or Amazon as an employer or 
+Amazon as a logistics company. The agent must implement a query disambiguation step that: (1) 
+identifies the most likely interpretation based on context, (2) asks clarifying questions when 
+ambiguity cannot be resolved, (3) documents assumptions made when proceeding with a specific 
+interpretation. 
+Historical context matters for disambiguation. A query about 'bank stress tests' in 2007 likely refers to 
+the European Banking Authority's stress test programme, while the same query in 2009 likely refers 
+to the US Federal Reserve's Supervisory Capital Assessment Program (SCAP) conducted in that year. 
+The agent should use temporal context to disambiguate. Note: The first US bank stress tests under 
+SCAP were conducted in 2007 following the Dodd-Frank Act. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 24 
+ 
+
+
+--- PAGE 25 ---
+ 
+ 
+ 
+ 
+SECTION A8: RAG PIPELINE DESIGN FOR FINANCIAL RESEARCH 
+A8.1 Retrieval Augmented Generation Fundamentals 
+What Is RAG And Why It Matters: 
+Retrieval Augmented Generation (RAG) is the architectural pattern that prevents your research agent 
+from hallucinating. Without RAG, the LLM generates responses purely from its training data, which 
+is static, potentially outdated, and lacks specific real-time financial information. With RAG, the agent 
+first retrieves relevant documents from external sources (SEC filings, financial databases, news 
+archives, its own vector database), then passes those documents as context to the LLM along with the 
+original query. The LLM generates its response grounded in the retrieved documents rather than 
+relying solely on parametric knowledge. 
+In the context of your autonomous financial research agent, RAG is not a single component but a 
+pipeline that spans multiple stages: query understanding, document retrieval, relevance filtering, 
+context assembly, generation, and post-generation verification. Each stage introduces potential failure 
+modes that must be addressed. 
+ 
+A8.2 The RAG Pipeline Stages 
+Stage 1: Query Transformation: 
+Raw user queries are often poor retrieval queries. A user asking 'Is Tesla a good investment?' needs to 
+be transformed into multiple specific retrieval queries: 'Tesla financial performance metrics 2023 
+2024', 'Tesla competitive risks electric vehicle market', 'Tesla revenue growth operating margins', 
+'Tesla analyst ratings price targets'. This transformation is performed by the LLM itself, using a query 
+decomposition prompt that generates 3-5 specific retrieval queries from a single user question. 
+ 
+Stage 2: Multi-Source Retrieval: 
+Unlike a typical RAG application that queries a single vector database, your financial research agent 
+performs retrieval across multiple sources simultaneously. The retrieval orchestrator dispatches 
+queries to: (1) the agent's long-term vector database for previously researched information, (2) the 
+SEC EDGAR API for regulatory filings, (3) financial data APIs for structured numerical data, (4) 
+news search APIs for recent coverage, and (5) earnings transcript databases for management 
+commentary. Each source returns results in a different format, requiring normalization before the 
+context assembly stage. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 25 
+ 
+
+

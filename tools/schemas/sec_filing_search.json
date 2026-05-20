@@ -1,0 +1,26 @@
+{
+  "type": "function",
+  "function": {
+    "name": "sec_filing_search",
+    "description": "Search and retrieve full-text SEC EDGAR filings for a publicly traded US company. Use this tool when you need authoritative official regulatory disclosures, risk factors, or management discussion and analysis (MD&A). Returns the full text of the filing, the filing date, and the accession number.",
+    "parameters": {
+      "type": "object",
+      "properties": {
+        "ticker": {
+          "type": "string",
+          "description": "The stock ticker symbol of the company (e.g., 'AAPL', 'MSFT', 'TSLA')."
+        },
+        "filing_type": {
+          "type": "string",
+          "enum": ["10-K", "10-Q", "8-K", "DEF 14A"],
+          "description": "The specific type of SEC filing to retrieve."
+        },
+        "year": {
+          "type": "integer",
+          "description": "The 4-digit filing year. If omitted, defaults to the most recent filing available."
+        }
+      },
+      "required": ["ticker", "filing_type"]
+    }
+  }
+}

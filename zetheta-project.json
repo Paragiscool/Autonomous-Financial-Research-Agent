@@ -1,0 +1,29 @@
+{
+  "intern_identifier": "[Your OAuth Login ID]",
+  "intern_name": "[Your Full Name]",
+  "intern_email": "[Your Email]",
+  "project_code": "1A",
+  "project_title": "Autonomous Financial Research Agent with Multi-Source Synthesis",
+  "submission_type": "github",
+  "submission_date": "2026-05-20T12:00:00Z",
+  "tech_stack": [
+    "Python",
+    "LangChain/LangGraph",
+    "OpenAI API",
+    "ChromaDB",
+    "SEC EDGAR API",
+    "yfinance"
+  ],
+  "github_repo_url": "https://github.com/Paragiscool/Autonomous-Financial-Research-Agent",
+  "duration_days": 15,
+  "assessment_criteria": {
+    "architecture_design": true,
+    "tool_orchestration": true,
+    "memory_system": true,
+    "error_handling": true,
+    "evaluation_framework": true,
+    "research_output_quality": true,
+    "code_quality": true,
+    "documentation": true
+  }
+}

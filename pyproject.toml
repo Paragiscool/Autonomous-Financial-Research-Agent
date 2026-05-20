@@ -1,0 +1,21 @@
+[project]
+name = "autonomous_financial_agent"
+version = "0.1.0"
+description = "Agentic AI - Autonomous Financial Research Agent"
+authors = [
+    { name = "QuantumEdge Research" }
+]
+dependencies = [
+    "langchain>=0.2.0",
+    "langgraph>=0.1.0",
+    "openai>=1.0.0",
+    "chromadb>=0.5.0",
+    "pydantic>=2.0.0",
+    "python-dotenv>=1.0.0",
+    "tenacity>=8.3.0"
+]
+requires-python = ">=3.10"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"

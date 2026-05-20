@@ -1,0 +1,219 @@
+--- PAGE 1 ---
+ 
+ 
+ 
+ 
+AGENTIC AI - AUTONOMOUS FINANCIAL RESEARCH 
+AGENT WITH MULTI-SOURCE SYNTHESIS 
+Category: AI Application Technology | Agentic AI Engineer 
+Timeline: 15 Days | AI-Accelerated Innovation & Research Project  
+Target: Undergraduate / MBA / Engineering Students  
+ 
+TASK: 
+To design and build a fully autonomous AI agent that replicates the research workflow of a junior 
+financial analyst by receiving a research query, independently formulating a research plan, gathering 
+data from multiple sources including SEC EDGAR filings, financial data APIs, earnings call transcripts, 
+news feeds, and web search, and synthesizing all findings into a structured, professional investment 
+research report - all without step-by-step human guidance. The agent must implement a ReAct or 
+Plan-and-Execute reasoning loop, a tool registry with a minimum of 10 tools, a three-layer memory 
+system (short-term, long-term via vector database, and episodic), a multi-source synthesis engine capable 
+of resolving conflicting data, comprehensive error handling with fallback chains, and an evaluation 
+framework covering 20+ quality metrics - validated across 8 progressive research challenges of 
+increasing difficulty.  
+ 
+PART A: TRAINING MATERIAL & LEARNING RESOURCES 
+PART B: GAMIFIED SIMULATION BUSINESS CONCEPT 
+PART C: CASE STUDIES & REAL-WORLD APPLICATIONS 
+PART D: 15-DAY PROJECT METHODOLOGY & DELIVERABLES 
+PART E: NO-CODE TOOLS & PLATFORMS GUIDE 
+PART F: SUBMISSION PROTOCOL 
+ 
+Important Note: 
+This Project is designed, developed, and administered solely by Zetheta Algorithms Private Limited ("Zetheta") 
+for the purpose of assessing candidates, students, or event participants on behalf of engaging employers, 
+institutes, or event organisers. Completion of this Project does not guarantee employment, academic outcomes, 
+awards, or any other result - all such decisions remain at the sole discretion of the respective engaging party. 
+Zetheta may use AI-assisted tools to evaluate submissions; such outputs are indicative in nature and may be 
+inaccurate or incomplete. By participating, you consent to your performance data, scores, and submissions 
+being shared with relevant engaging parties for assessment and decision-making purposes. 
+ 
+ 
+ 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 1 
+ 
+
+
+--- PAGE 2 ---
+ 
+ 
+ 
+ 
+EXECUTIVE SUMMARY 
+This project positions students as Agentic AI Engineers at a fictional quantitative research firm - 
+QuantumEdge Research - requiring them to master the convergence of large language model 
+reasoning, financial data engineering, and autonomous system design. Unlike traditional AI projects 
+that operate within a single domain, this project demands simultaneous fluency in LLM orchestration, 
+RAG pipeline architecture, and vector database design on one side, and SEC regulatory filings, 
+earnings analysis, financial ratio computation, and investment research methodology on the other. 
+The core challenge students must solve: How can an AI system replace the junior analyst workflow - 
+receiving a research query, formulating a plan, gathering data from disparate sources, resolving 
+conflicting information, and producing a professional-grade investment research report - entirely 
+without step-by-step human guidance? The answer lies in a purpose-built autonomous agent 
+architecture that orchestrates a registry of 10+ tools through a ReAct or Plan-and-Execute reasoning 
+loop, grounds every output in retrieved source documents through a multi-stage RAG pipeline, and 
+implements a three-layer memory system combining short-term context management, long-term 
+vector storage, and episodic strategy memory. 
+Students will build ARA-1 - an Autonomous Research Agent validated across eight progressive 
+research challenges of increasing complexity, from a basic company profile to a full investment report 
+under simulated tool failures. The agent must handle ambiguous queries, resolve contradictory data 
+across sources using a reliability hierarchy, recover gracefully from API failures through fallback 
+chains, and score above 70% tool efficiency and below 2% hallucination rate - benchmarked against 
+human analyst research reports. 
+The global investment research market is valued at over $8 billion annually, while financial 
+institutions spend an estimated $50+ billion per year on junior analyst labour performing largely 
+repeatable, data-intensive research tasks. Yet the vast majority of this workflow remains manual, slow, 
+and prone to human error. This project closes this intelligence gap - equipping students to build the 
+next generation of autonomous research infrastructure, with architecture patterns directly applicable to 
+hedge funds, investment banks, and financial data platforms seeking to deploy production-grade 
+agentic AI systems. 
+ 
+ 
+ 
+ 
+ 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 2 
+ 
+
+
+--- PAGE 3 ---
+ 
+ 
+ 
+ 
+PART A: TRAINING MATERIAL & LEARNING RESOURCES 
+SECTION A1: INTRODUCTION TO AGENTIC AI SYSTEMS 
+A1.1 What Is An AI Agent? 
+Definition And Core Concept: 
+An AI agent is a software system that perceives its environment through sensors or data inputs, 
+reasons about that information using one or more large language models (LLMs), and takes 
+autonomous action through tool invocation to achieve a specified goal. Unlike traditional chatbots that 
+respond to single prompts in isolation, an agent maintains state across multiple reasoning steps, 
+selects tools dynamically based on intermediate results, and self-corrects when it detects errors or 
+inconsistencies in its output. 
+In the context of financial research, an AI agent replaces or augments the junior analyst workflow. A 
+human junior analyst at an investment bank typically receives a research assignment, formulates a 
+research plan, gathers data from multiple sources (Bloomberg terminal, SEC EDGAR filings, earnings 
+call transcripts, industry reports, news feeds), synthesizes findings, identifies patterns and anomalies, 
+and produces a structured research report. An agentic AI system mirrors each of these steps 
+programmatically, with the LLM serving as the reasoning engine that decides what information to 
+gather next and how to interpret it. 
+ 
+Key Characteristics Of AI Agents: 
+●​ Autonomy: The agent operates without step-by-step human guidance once given an initial goal 
+or query. It decides which tools to invoke, in what order, and how to interpret results. 
+●​ Reactivity: The agent responds to changes in its environment. If a tool returns unexpected 
+results, the agent adjusts its plan rather than failing silently. 
+●​ Proactivity: The agent anticipates information needs. If researching a pharmaceutical 
+company, it proactively checks FDA approval databases even if not explicitly instructed. 
+●​ Social ability: In multi-agent architectures, agents communicate with other agents, delegate 
+sub-tasks, and aggregate findings from specialist agents. 
+●​ Memory: The agent maintains both short-term memory (current research session context) and 
+long-term memory (accumulated knowledge from previous research tasks stored in a vector 
+database). 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 3 
+ 
+
+
+--- PAGE 4 ---
+ 
+ 
+ 
+ 
+A1.2 The Evolution From Chatbots To Agents 
+Generation 1: Rule-Based Systems (Pre-2020): 
+Early financial AI systems were deterministic. They followed pre-programmed decision trees: if a 
+stock price dropped more than 5% in a day, generate an alert. If a company filed a 10-K with a going 
+concern opinion, flag it as high risk. These systems were brittle because they could not handle 
+scenarios outside their programmed rules. A novel type of risk disclosure in an SEC filing, for 
+example, would pass through undetected because no rule existed to catch it. 
+ 
+Generation 2: Llm-Powered Chatbots (2022-2023): 
+The release of GPT-3.5 and GPT-4 enabled natural language interaction with financial data. Users 
+could ask questions like 'What were Apple's revenue drivers in Q3 2023?' and receive coherent 
+answers. However, these systems had critical limitations: they relied entirely on training data (no 
+real-time information), they could not verify their own outputs against authoritative sources, and they 
+hallucinated confidently when they lacked information. A chatbot might fabricate a quarterly revenue 
+figure that sounded plausible but was entirely wrong. 
+ 
+Generation 3: Agentic AI Systems (2024-Present): 
+Agentic systems address these limitations by giving the LLM the ability to use tools. Instead of 
+guessing Apple's Q3 revenue, the agent calls a financial data API to retrieve the exact figure. Instead 
+of relying on training data for recent news, the agent performs a web search. The LLM's role shifts 
+from being the source of information to being the reasoning engine that orchestrates information 
+retrieval and synthesis. This is the paradigm you will build in this project. 
+ 
+A1.3 The React Framework 
+Reasoning And Acting: 
+The ReAct (Reasoning + Acting) framework, introduced by Yao et al. (2022), is the foundational 
+paradigm for most agentic AI systems. In ReAct, the agent alternates between two modes: 
+1.​ Thought: The agent reasons about the current state of its research, what information it has 
+gathered so far, what information is missing, and what tool to invoke next. This reasoning step 
+is generated by the LLM and is visible in the agent's trace log. 
+2.​ Action: Based on its reasoning, the agent selects and invokes a tool with specific parameters. 
+For example: Action: search_sec_filings(ticker='AAPL', filing_type='10-K', year=2023). 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 4 
+ 
+
+
+--- PAGE 5 ---
+ 
+ 
+ 
+ 
+Observation: The tool returns results, which the agent incorporates into its context. The agent then 
+generates another Thought step to interpret the results and decide what to do next. 
+ 
+This Thought-Action-Observation loop continues until the agent determines it has gathered sufficient 
+information to produce its final output, or until it reaches a maximum iteration limit (a safety 
+mechanism to prevent infinite loops). 
+ 
+React Example In Financial Research: 
+User Query: 'Prepare a risk assessment for Tesla Inc.' 
+ 
+Thought 1: I need to assess Tesla's risk profile. I should start by 
+  retrieving their most recent 10-K filing to understand their 
+  disclosed risk factors. 
+Action 1: search_sec_filings(ticker='TSLA', filing_type='10-K', 
+  year=2024) 
+Observation 1: [Returns 10-K filing with 42 risk factors listed] 
+ 
+Thought 2: I have the disclosed risk factors. Now I need recent 
+  news to identify emerging risks not yet captured in filings. 
+Action 2: web_search('Tesla risks challenges 2024 2025') 
+Observation 2: [Returns 10 news articles about supply chain, 
+  regulatory, and competition risks] 
+ 
+Thought 3: I should also check analyst sentiment from recent 
+  earnings calls to see how management addresses these risks. 
+Action 3: get_earnings_transcript(ticker='TSLA', quarter='Q3', 
+  year=2024) 
+Observation 3: [Returns transcript with Q&A section] 
+ 
+Thought 4: I now have three data sources. Let me cross-reference 
+  the disclosed risks with news and management commentary to 
+  produce a comprehensive risk assessment. 
+Action 4: generate_report(template='risk_assessment', 
+  sources=[filing, news, transcript]) 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 5 
+ 
+
+

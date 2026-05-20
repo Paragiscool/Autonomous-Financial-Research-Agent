@@ -1,0 +1,196 @@
+--- PAGE 26 ---
+ 
+ 
+ 
+ 
+Stage 3: Relevance Filtering And Re-Ranking: 
+Raw retrieval results often contain irrelevant or marginally relevant documents. A search for 'Tesla 
+operating margins' might return documents about Tesla's factory operations (which mention 
+'operating' and 'margin' but not in a financial context). The relevance filtering stage uses a 
+cross-encoder re-ranking model (such as Cohere's rerank-english-v3 or a locally-run cross-encoder 
+model from sentence-transformers) to score each retrieved document against the original query and 
+filter out documents below a relevance threshold. 
+For financial research, domain-specific re-ranking is especially important. A general-purpose 
+re-ranker may not understand that a paragraph discussing 'EBITDA margin expansion' is highly 
+relevant to a query about 'operating margins' even though the exact phrase does not match. 
+ 
+Stage 4: Context Assembly: 
+The context assembly stage determines how retrieved documents are presented to the LLM. This is a 
+critical design decision because the context window is limited and the order and formatting of context 
+directly impacts generation quality. Key considerations include: 
+●​ Source attribution: Each context chunk must be tagged with its source (filing type, date, URL) 
+so the LLM can generate proper citations. 
+●​ Recency weighting: More recent documents should appear earlier in the context to bias the 
+LLM toward current information. 
+●​ Diversity enforcement: Ensure context includes documents from multiple source types, not 
+just the highest-ranked results from a single source. 
+●​ Token budgeting: Allocate context window space proportionally: 40% for primary data 
+(filings, financials), 30% for supporting evidence (news, analyst reports), 20% for system 
+prompt and tool descriptions, 10% for generation space. 
+ 
+Stage 5: Grounded Generation: 
+The LLM generates its response using the assembled context. The system prompt must explicitly 
+instruct the LLM to: (1) only make claims supported by the provided context, (2) cite specific sources 
+for every factual claim, (3) acknowledge when the context is insufficient to answer part of the query, 
+and (4) distinguish between facts retrieved from sources and inferences drawn from those facts. 
+ 
+ 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 26 
+ 
+
+
+--- PAGE 27 ---
+ 
+ 
+ 
+ 
+Stage 6: Post-Generation Verification: 
+After generation, the verification stage checks every factual claim in the output against the retrieved 
+context. This is implemented as a separate LLM call with a verification prompt: 'Given the following 
+source documents [context] and the following generated text [output], identify any claims in the 
+output that are not supported by the source documents.' Claims that fail verification are either 
+corrected using the source data or flagged with a disclaimer. 
+ 
+A8.3 Advanced RAG Patterns 
+Iterative RAG (Self-RAG): 
+In standard RAG, retrieval happens once before generation. In iterative RAG, the agent interleaves 
+retrieval and generation: it generates a partial response, identifies information gaps in that partial 
+response, performs targeted retrieval to fill those gaps, and continues generation. This pattern is 
+particularly effective for complex research queries where the full scope of required information only 
+becomes apparent as the agent begins drafting its analysis. 
+ 
+Adaptive Retrieval: 
+Not every query requires the same retrieval strategy. A factual question ('What was Apple's Q3 2024 
+revenue?') needs precision-oriented retrieval from structured financial data. An analytical question 
+('What are the major competitive threats to Netflix?') needs breadth-oriented retrieval from diverse 
+sources. The agent should classify the query type and adapt its retrieval strategy accordingly. This is 
+known as adaptive retrieval and can be implemented by having the LLM generate a retrieval strategy 
+document before executing any retrieval. 
+ 
+Hypothetical Document Embedding (Hyde): 
+HyDE is a technique where the LLM first generates a hypothetical ideal answer to the query (without 
+any retrieval), then embeds that hypothetical answer and uses it as the retrieval query instead of the 
+original user question. The rationale is that a hypothetical answer is more semantically similar to the 
+actual answer documents in the vector database than the original question is. For financial research, 
+this can significantly improve retrieval quality for complex analytical queries. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 27 
+ 
+
+
+--- PAGE 28 ---
+ 
+ 
+ 
+ 
+A8.4 RAG Failure Modes In Financial Research 
+Common Failure Modes And Mitigations: 
+●​ Retrieval failure (no relevant documents found): Mitigation – expand search terms, try 
+synonym queries, fall back to web search. 
+●​ Context poisoning (irrelevant documents ranked highly): Mitigation – implement strict 
+relevance threshold, use domain-specific re-ranker. 
+●​ Context overflow (too many relevant documents for context window): Mitigation – implement 
+progressive summarization, prioritize by recency and source tier. 
+●​ Citation fabrication (LLM invents sources not in context): Mitigation – post-generation 
+citation verification against actual retrieved documents. 
+●​ Temporal confusion (LLM mixes data from different time periods): Mitigation – tag all 
+context chunks with dates, include temporal instructions in system prompt. 
+●​ Cross-company contamination (data from company A cited for company B): Mitigation – tag 
+all context chunks with company identifiers, implement entity-level filtering. 
+ 
+ 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 28 
+ 
+
+
+--- PAGE 29 ---
+ 
+ 
+ 
+ 
+PART B: GAMIFIED SIMULATION BUSINESS CONCEPT 
+Note on the Simulation Concept: The gamified simulation concept presented in this section is 
+provided as a reference framework. Students may choose to follow this concept or design their own 
+original gamified simulation - with a different name, structure, narrative, or game mechanics - as long 
+as it meets the assessment criteria outlined in Part F. 
+SECTION B1: SIMULATION OVERVIEW 
+B1.1 Scenario Setup 
+Your Role: 
+You are the Lead AI Agent Architect at QuantumEdge Research, a newly funded quantitative research 
+firm that has secured $12 million in Series A funding to build the industry's first fully autonomous 
+investment research platform. The firm's thesis is that AI agents can produce research reports of equal 
+or greater quality than human junior analysts, at a fraction of the cost and in a fraction of the time. 
+Your mandate is to design, build, and validate the firm's first Autonomous Research Agent 
+(codenamed 'ARA-1'). 
+The firm's founding partners are former senior analysts from Goldman Sachs, Citadel, and Two 
+Sigma. They have exacting standards for research quality and will evaluate your agent's output against 
+a benchmark set of human-produced research reports. You have 15 working days to deliver a 
+production-ready agent architecture with demonstrated capabilities. 
+ 
+B1.2 The Research Quality Board 
+Your Evaluation Panel: 
+The Research Quality Board (RQB) is a panel of three simulated evaluators who assess your agent's 
+output at multiple checkpoints: 
+Dr. Sarah Chen (Accuracy Hawk): Former SEC enforcement attorney turned quant researcher. She 
+is obsessed with factual accuracy and will identify every numerical error, misattributed quote, and 
+unsupported claim in your agent's output. Her evaluation weight: 40% of research quality score. 
+Marcus Thompson (Insight Hunter): Former senior analyst at Citadel with 15 years of investment 
+research experience. He evaluates the depth and originality of analytical insights. He is not impressed 
+by reports that merely summarize retrieved data without adding analytical value. His evaluation 
+weight: 35% of research quality score. 
+Priya Sharma (Systems Thinker): Former engineering lead at Two Sigma who built their internal 
+research tools. She evaluates the agent's architecture, tool efficiency, error handling, and scalability. 
+She cares less about the content of individual reports and more about whether the system is robust 
+enough to handle thousands of research queries reliably. Her evaluation weight: 25% of research 
+quality score. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 29 
+ 
+
+
+--- PAGE 30 ---
+ 
+ 
+ 
+ 
+SECTION B2: THE EIGHT RESEARCH CHALLENGES 
+B2.1 Challenge Progression 
+The eight challenges are designed to test your agent's capabilities with increasing complexity. Each 
+challenge builds on the previous ones, and the agent's architecture should demonstrate learning and 
+improvement across challenges. 
+ 
+Challenge 1: Single-Company Profile (Difficulty: 1/5): 
+Query: 'Create a comprehensive profile of Microsoft Corporation including business overview, 
+financial summary, key executives, and recent developments.' 
+Expected tools: company_profile, financial_data_api, web_search 
+Expected output: 3-5 page company profile 
+Key evaluation criteria: Accuracy of basic facts, completeness of financial summary, currency of 
+information. 
+ 
+Challenge 2: Earnings Analysis (Difficulty: 2/5): 
+Query: 'Analyze Apple Inc.'s most recent quarterly earnings. Compare actual results to consensus 
+estimates and identify key takeaways from the earnings call.' 
+Expected tools: financial_data_api, earnings_transcript, web_search, news_sentiment 
+Expected output: 5-7 page earnings analysis 
+Key evaluation criteria: Correct identification of beats/misses, quality of transcript analysis, 
+identification of forward guidance. 
+ 
+Challenge 3: Risk Assessment (Difficulty: 2/5): 
+Query: 'Produce a comprehensive risk assessment for Tesla Inc. covering financial risks, operational 
+risks, regulatory risks, and competitive risks.' 
+Expected 
+tools: 
+sec_filing_search, 
+web_search, 
+news_sentiment, 
+financial_data_api, 
+earnings_transcript 
+Expected output: 8-10 page risk report 
+Key evaluation criteria: Breadth of risk identification, use of SEC risk factors, integration of current 
+news, quantification of risks where possible. 
+Strictly Private and Confidential - Not for Circulation                                                                                   Page number: 30 
+ 
+
+
