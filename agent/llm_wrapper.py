@@ -1,10 +1,8 @@
 import os
-import tiktoken
 import logging
 from dotenv import load_dotenv
-from langchain_openai import ChatOpenAI
+from langchain_google_genai import ChatGoogleGenerativeAI
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
-import openai
 
 # Load environment variables from your .env file
 load_dotenv()
@@ -14,41 +12,27 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 logger = logging.getLogger(__name__)
 
 class RobustLLM:
-    def __init__(self, model_name="gpt-4o-mini", temperature=0.1):
+    def __init__(self, temperature=0.1):
         """
-        Initializes the LLM wrapper. 
-        We default to gpt-4o-mini for development to save costs, and a low temperature (0.1) 
-        because financial research requires factual determinism, not high creativity.
+        Initializes the LLM wrapper using Gemini 2.5 Flash (free-tier via Google AI Studio).
+        Model is resolved from the GOOGLE_API_KEY env variable — no hardcoded credentials.
         """
-        self.model_name = model_name
-        self.llm = ChatOpenAI(
+        self.model_name = "gemini-2.5-flash"
+        self.llm = ChatGoogleGenerativeAI(
             model=self.model_name,
-            api_key=os.getenv("OPENAI_API_KEY"),
+            api_key=os.getenv("GOOGLE_API_KEY"),
             temperature=temperature
         )
-        # Load the correct tokenizer for the specified model.
-        # Falls back to cl100k_base (GPT-4 family) for unknown model names.
-        try:
-            self.encoding = tiktoken.encoding_for_model(self.model_name)
-        except KeyError:
-            logger.warning(f"tiktoken: Unknown model '{self.model_name}'. Falling back to cl100k_base encoding.")
-            self.encoding = tiktoken.get_encoding("cl100k_base")
 
     def count_tokens(self, text: str) -> int:
-        """Returns the exact number of tokens in a text string."""
-        return len(self.encoding.encode(text))
+        """Returns a rough estimate of tokens in a text string without external downloads."""
+        return len(text) // 4
 
-    # The @retry decorator automatically intercepts specific API errors and waits 
-    # before trying again. It starts at a 2-second wait and doubles up to 10 seconds, 
-    # failing completely only after 5 attempts.
+    # We use Exception since Google GenAI might throw different exceptions than OpenAI
     @retry(
         stop=stop_after_attempt(5),
         wait=wait_exponential(multiplier=1, min=2, max=10),
-        retry=retry_if_exception_type((
-            openai.RateLimitError, 
-            openai.APIConnectionError, 
-            openai.InternalServerError
-        )),
+        retry=retry_if_exception_type(Exception),
         before_sleep=lambda retry_state: logger.warning(
             f"API Error. Retrying in {retry_state.next_action.sleep} seconds..."
         )
@@ -56,9 +40,9 @@ class RobustLLM:
     def generate(self, prompt: str) -> str:
         """Sends the prompt to the LLM with token tracking and retry protection."""
         token_count = self.count_tokens(prompt)
-        logger.info(f"Sending prompt to {self.model_name} ({token_count} tokens)")
+        logger.info(f"Sending prompt to {self.model_name} (approx {token_count} tokens)")
         
-        # Invoke the LangChain ChatOpenAI model
+        # Invoke the LangChain Google model
         response = self.llm.invoke(prompt)
         return response.content
 

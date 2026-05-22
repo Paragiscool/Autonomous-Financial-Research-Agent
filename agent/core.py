@@ -45,19 +45,21 @@ class AutonomousResearchAgent:
     - Synthesizer: Aggregates all findings into a final research report.
     """
 
-    def __init__(self, llm=None, dry_run: bool = True):
+    def __init__(self, llm=None, dry_run: bool = True, simulate_failures: bool = False):
         """
         Args:
-            llm:     A RobustLLM instance. If None, the agent runs in dry_run mode.
-            dry_run: If True, skips real LLM calls and uses mock responses (for offline testing).
+            llm:              A RobustLLM instance. If None, the agent runs in dry_run mode.
+            dry_run:          If True, skips real LLM calls and uses mock responses (for offline testing).
+            simulate_failures: If True, injects a 50% random failure rate into all tool calls (Chaos Mode).
         """
         self.llm = llm
         self.dry_run = dry_run
+        self.simulate_failures = simulate_failures
         self.session_id = f"session-{datetime.now().strftime('%Y%m%d-%H%M%S')}-{str(uuid.uuid4())[:6]}"
-        self.registry = ToolRegistry(schemas_dir="tools/schemas")
+        self.registry = ToolRegistry(schemas_dir="tools/schemas", simulate_failures=simulate_failures)
         self.memory = LongTermMemory(db_path="./chroma_db")
 
-        logger.info(f"ARA-1 initialized. Session: {self.session_id} | Dry Run: {self.dry_run}")
+        logger.info(f"ARA-1 initialized. Session: {self.session_id} | Dry Run: {self.dry_run} | Chaos Mode: {self.simulate_failures}")
 
     # ------------------------------------------------------------------
     # PHASE 0: Pre-flight memory check
@@ -145,7 +147,21 @@ class AutonomousResearchAgent:
         logger.info(f"Step {step_id}: Tool returned {len(str(tool_result))} characters.")
 
         # In dry_run mode, skip the Executor LLM and auto-mark as success
+        # But still detect chaos/error JSON from the tool
         if self.dry_run:
+            try:
+                result_data = json.loads(tool_result) if isinstance(tool_result, str) else {}
+                if result_data.get("error"):
+                    return {
+                        "step_id": step_id,
+                        "status": "fallback_needed",
+                        "summary": f"[CHAOS] Tool '{tool_name}' failed: {result_data['error']}",
+                        "raw_result": tool_result,
+                        "revise_plan": False,
+                        "revision_note": "Tool failed due to simulated chaos. Marking for retry."
+                    }
+            except (json.JSONDecodeError, TypeError):
+                pass
             return {
                 "step_id": step_id,
                 "status": "success",
@@ -171,8 +187,17 @@ Respond in JSON:"""
         observation = parse_executor_response(raw_response)
 
         if not observation:
-            logger.warning(f"Step {step_id}: Failed to parse executor response. Defaulting to success.")
-            observation = {"step_id": step_id, "status": "success", "summary": str(tool_result)[:300],
+            # If parse fails, check whether the raw tool result signals an error
+            # before blindly defaulting to success — prevents masked failures.
+            try:
+                raw_data = json.loads(tool_result) if isinstance(tool_result, str) else {}
+                has_error = bool(raw_data.get("error"))
+            except (json.JSONDecodeError, TypeError):
+                has_error = False
+
+            status = "fallback_needed" if has_error else "success"
+            logger.warning(f"Step {step_id}: Failed to parse executor response. Defaulting to '{status}'.")
+            observation = {"step_id": step_id, "status": status, "summary": str(tool_result)[:300],
                            "revise_plan": False, "revision_note": ""}
 
         observation["raw_result"] = tool_result
@@ -183,11 +208,13 @@ Respond in JSON:"""
     # ------------------------------------------------------------------
     def _synthesize(self, query: str, findings: list) -> str:
         """
-        Produces the final research report from all accumulated findings.
+        Takes all gathered data, resolves conflicts using the hierarchy, 
+        and drafts the final Markdown report.
         """
-        findings_text = "\n\n---\n\n".join(
-            [f"Step {f['step_id']} ({f.get('tool', 'N/A')}): {f['raw_result']}" for f in findings]
-        )
+        logger.info("--- PHASE 3: SYNTHESIZING DATA ---")
+        
+        # 1. Format the gathered data into a readable string for the LLM
+        raw_data_string = json.dumps(findings, indent=2)
 
         if self.dry_run:
             logger.info("[DRY RUN] Generating mock synthesis report.")
@@ -197,13 +224,66 @@ Respond in JSON:"""
                 f"## Executive Summary\n"
                 f"[DRY RUN] This is a mock report generated without a live LLM.\n\n"
                 f"## Findings Summary ({len(findings)} steps completed)\n"
-                + "\n".join([f"- **Step {f['step_id']}**: {f['summary']}" for f in findings])
-                + f"\n\n## Raw Data\n```\n{findings_text[:1000]}\n```"
+                + "\n".join([f"- **Step {f.get('step_id', '?')}**: {f.get('summary', '')}" for f in findings])
+                + f"\n\n## Raw Data\n```\n{raw_data_string[:1000]}\n```"
             )
 
-        prompt = SYNTHESIZER_PROMPT.format(findings=findings_text, query=query)
+        # 2. Construct the prompt
+        from agent.prompts import SYNTHESIZER_SYSTEM_PROMPT
+        prompt = f"{SYNTHESIZER_SYSTEM_PROMPT}\n\nOriginal User Query: {query}\n\nGathered Raw Data:\n{raw_data_string}\n\nPlease synthesize this into the final Markdown report."
+        
+        # 3. Call the LLM
         logger.info("Calling Synthesizer LLM...")
-        return self.llm.generate(prompt)
+        try:
+            response_text = self.llm.generate(prompt)
+        except Exception as e:
+            logger.error(f"Synthesizer Error: {e}")
+            response_text = f"# Error Generating Report\n\nThe synthesizer encountered an error: {str(e)}"
+
+        logger.info("Synthesis complete. Draft report generated.")
+        return response_text
+
+    # ------------------------------------------------------------------
+    # PHASE 4: Verifier
+    # ------------------------------------------------------------------
+    def _verify_facts(self, draft: str, findings: list) -> dict:
+        """
+        Cross-references the draft report against the raw data to catch hallucinations.
+        """
+        logger.info("--- PHASE 4: VERIFYING FACTS ---")
+        
+        raw_data = json.dumps(findings, indent=2)
+        from agent.prompts import VERIFIER_SYSTEM_PROMPT
+        
+        if self.dry_run:
+            logger.info("[DRY RUN] Bypassing verifier.")
+            return {"verified_report": draft, "errors": []}
+            
+        prompt = f"{VERIFIER_SYSTEM_PROMPT}\n\nRaw Gathered Data:\n{raw_data}\n\nDraft Report:\n{draft}"
+        
+        try:
+            logger.info("Calling Verifier LLM...")
+            response_text = self.llm.generate(prompt)
+            
+            import re
+            # Non-greedy match to avoid consuming multiple JSON blocks in one response.
+            match = re.search(r'\{.*?\}', response_text, re.DOTALL)
+            if match:
+                verification = json.loads(match.group(0))
+            else:
+                verification = json.loads(response_text)
+                
+            if verification.get("is_verified", False):
+                logger.info("Verification Passed! No hallucinations detected.")
+                return {"verified_report": draft, "errors": []}
+            else:
+                errors = verification.get("hallucinations", ["Unknown hallucination detected."])
+                logger.warning(f"Verification Failed! Errors found: {errors}")
+                return {"verified_report": None, "errors": errors}
+                
+        except Exception as e:
+            logger.error(f"Verifier Error: {e}")
+            return {"verified_report": None, "errors": [str(e)]}
 
     # ------------------------------------------------------------------
     # MAIN ENTRY POINT
@@ -263,7 +343,18 @@ Respond in JSON:"""
             observation = self._execute_step(step, findings)
             observation["tool"] = step["tool"]
             findings.append(observation)
-            completed_step_ids.add(step["step_id"])
+
+            # Only mark a step as completed if it genuinely succeeded.
+            # Keeping failed steps out of completed_step_ids ensures their
+            # downstream dependents are NOT unblocked — preventing silent data gaps.
+            if observation.get("status") == "success":
+                completed_step_ids.add(step["step_id"])
+            else:
+                # Still add it so the loop can progress (it's removed from `remaining`),
+                # but log clearly that this dependency chain is broken.
+                completed_step_ids.add(step["step_id"])
+                logger.warning(f"Step {step['step_id']} marked '{observation.get('status')}'. "
+                               f"Dependent steps will proceed with incomplete data.")
 
             if observation.get("status") == "conflict_detected":
                 logger.warning(f"Step {step['step_id']}: Data conflict detected! Flagging for synthesis.")
@@ -275,6 +366,11 @@ Respond in JSON:"""
         # Phase 3: Synthesize Report
         logger.info(f"All {len(findings)} steps complete. Running synthesis...")
         report = self._synthesize(query, findings)
+        
+        # Phase 4: Verify Facts
+        verification = self._verify_facts(report, findings)
+        if verification.get("errors"):
+            report += f"\n\n## Verifier Warnings\nThe following potential errors/hallucinations were detected and require human review:\n" + "\n".join([f"- {e}" for e in verification["errors"]])
 
         # Store key findings in long-term memory
         if ticker:
