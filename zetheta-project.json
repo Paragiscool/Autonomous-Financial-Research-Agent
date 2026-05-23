@@ -5,14 +5,16 @@
   "project_code": "1A",
   "project_title": "Autonomous Financial Research Agent with Multi-Source Synthesis",
   "submission_type": "github",
-  "submission_date": "2026-05-20T12:00:00Z",
+  "submission_date": "2026-05-23T12:00:00Z",
   "tech_stack": [
     "Python",
     "LangChain/LangGraph",
-    "OpenAI API",
+    "Google Gemini 2.5 Flash",
     "ChromaDB",
     "SEC EDGAR API",
-    "yfinance"
+    "yfinance",
+    "Tavily",
+    "TextBlob"
   ],
   "github_repo_url": "https://github.com/Paragiscool/Autonomous-Financial-Research-Agent",
   "duration_days": 15,

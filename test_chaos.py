@@ -67,7 +67,8 @@ def run_chaos_gauntlet():
 
     # ── Run the full research loop ────────────────────────────────────────────
     logger.info("Starting research loop with chaos enabled...")
-    report = agent.research(query=FINAL_QUERY, ticker="NVDA")
+    result = agent.research(query=FINAL_QUERY, ticker="NVDA")
+    report = result["report"]
 
     # ── Print summary stats from findings ────────────────────────────────────
     print(f"\n{DIVIDER}")

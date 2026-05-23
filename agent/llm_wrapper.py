@@ -24,9 +24,11 @@ class RobustLLM:
             temperature=temperature
         )
 
-    def count_tokens(self, text: str) -> int:
+    def count_tokens(self, text) -> int:
         """Returns a rough estimate of tokens in a text string without external downloads."""
-        return len(text) // 4
+        if isinstance(text, list):
+            return sum(len(getattr(msg, 'content', str(msg))) for msg in text) // 4
+        return len(str(text)) // 4
 
     # We use Exception since Google GenAI might throw different exceptions than OpenAI
     @retry(

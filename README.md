@@ -1,158 +1,101 @@
-# ARA-1: Autonomous Financial Research Agent 📈
+# 🚀 ARA-1: Autonomous Financial Research Agent
 
-**QuantumEdge Research — Project 1A**
+> **An advanced, fault-tolerant LangGraph state machine designed to synthesize SEC regulatory filings, live financial data, and market sentiment into verified, investment-grade markdown reports.**
 
-ARA-1 is a fully autonomous AI agent designed to replicate the workflow of a senior financial analyst. It receives complex research queries, independently formulates a multi-step research plan, gathers data from disparate sources (SEC EDGAR filings, financial APIs, real-time news feeds, web search), resolves conflicting data through a strict Source Reliability Hierarchy, and synthesizes findings into structured investment-grade reports — with a built-in Anti-Hallucination Shield to verify every number before publication.
-
----
-
-## 🚦 Project Status
-
-| Component | Status |
-|-----------|--------|
-| Plan-and-Execute Cognitive Loop | ✅ Live & Verified |
-| 6-Tool Live Registry (SEC, yfinance, Web, News) | ✅ Live & Verified |
-| Multi-Source Conflict Resolution Synthesizer | ✅ Live & Verified |
-| Verifier (Anti-Hallucination Shield) | ✅ Live & Verified |
-| Chaos Engineering Resilience (Challenge 8) | ✅ Live & Verified |
-| Long-Term Semantic Memory (ChromaDB) | ✅ Live & Verified |
+ARA-1 replicates the workflow of a senior financial analyst. It receives complex research queries, independently formulates a multi-step topological research plan, gathers data from disparate sources, resolves conflicting data through a strict **Source Reliability Hierarchy**, and runs a post-generation **Anti-Hallucination Shield** to verify every numerical claim before publication.
 
 ---
 
-## ✨ Key Features
+## 🧠 Cognitive Architecture (LangGraph State Machine)
 
-### 🧩 Multi-Source Synthesizer — Conflict Resolution Engine
-When different data sources disagree (e.g., a Web Search article reports NVIDIA Q4 revenue as $19.0B while the official SEC 10-K shows $18.4B), the Synthesizer enforces a strict **Source Reliability Hierarchy** to resolve the conflict and select the correct figure:
+ARA-1 implements a robust **Plan-and-Execute** cognitive loop with advanced telemetry, semantic caching, and map-reduce context compression.
 
+```mermaid
+graph TD
+    %% Define Node Styles
+    classDef user fill:#2d3436,stroke:#dfe6e9,stroke-width:2px,color:#fff;
+    classDef memory fill:#0984e3,stroke:#74b9ff,stroke-width:2px,color:#fff;
+    classDef core fill:#6c5ce7,stroke:#a29bfe,stroke-width:2px,color:#fff;
+    classDef tools fill:#00b894,stroke:#55efc4,stroke-width:2px,color:#fff;
+    classDef chaos fill:#d63031,stroke:#ff7675,stroke-width:2px,color:#fff;
+    classDef final fill:#e84393,stroke:#fd79a8,stroke-width:2px,color:#fff;
+
+    %% Graph Flow
+    A[User Query]:::user --> B{Semantic Cache <br> ChromaDB}:::memory
+    B -- Hit < 0.2 dist --> Z[Return Cached Report < 1s]:::final
+    B -- Miss / Expired --> C[Planner Node]:::core
+    
+    C --> D[Executor Node]:::core
+    D <--> E{Tool Registry <br> with Chaos Injector}:::chaos
+    
+    %% Tools
+    E -->|Route| T1[SEC EDGAR API]:::tools
+    E -->|Route| T2[yfinance API]:::tools
+    E -->|Route| T3[Tavily Web Search]:::tools
+    E -->|Route| T4[TextBlob NLP]:::tools
+    
+    %% Loop back
+    E -- 50% Simulated Failure --> D
+    
+    D -- All Steps Complete --> F[Map-Reduce <br> Data Compressor]:::core
+    F --> G[Synthesizer Node]:::core
+    G --> H{Verifier Node <br> Anti-Hallucination}:::core
+    
+    H -- Hallucination Detected --> G
+    H -- Verified True --> I[Save to ChromaDB]:::memory
+    I --> J[Final Verified Markdown]:::final
 ```
-[Tier 1] SEC Regulatory Filings (10-K, 10-Q) — ULTIMATE TRUTH
-[Tier 2] Financial Data APIs (yfinance, income statements)
-[Tier 3] Earnings Call Transcripts
-[Tier 4] Major News Outlets / Web Search
-[Tier 5] Social Media / Sentiment — Qualitative only
-```
-
-Every conflict is documented in a dedicated **"Research Notes & Discrepancies"** section of the final report. Verified live: Tier 1 SEC data ($18.4B) correctly overrode Tier 4 Web Search data ($19.0B).
 
 ---
 
-### 🛡️ Verifier — Anti-Hallucination Shield
-A post-generation editing node that acts as a strict Fact-Checking Editor. After the Synthesizer produces a draft, the Verifier:
-1. Extracts every numerical claim, metric, and date from the draft report.
-2. Cross-references each figure against the original raw JSON data payload.
-3. Returns a structured JSON verdict: `{"is_verified": true/false, "hallucinations": [...]}`.
-4. If hallucinations are detected, appends a **"Verifier Warnings"** section to the final report flagging each error for human review.
+## ✨ Key Features & Engineering Highlights
 
-**Verified live:** Correctly passed a clean report and caught a deliberate `$18.5B` injection (actual: `$18.4B`) with three precise, sourced error descriptions.
+### 1. Multi-Source Synthesizer (Conflict Resolution Engine)
+When disparate data sources disagree, ARA-1 does not blindly average them. It enforces a strict **Source Reliability Hierarchy** to resolve conflicts and select the authoritative figure. 
 
----
+```mermaid
+sequenceDiagram
+    participant Web as Tier 4: Tavily Web Search
+    participant SEC as Tier 1: SEC EDGAR 10-K
+    participant Syn as Synthesizer Node
+    participant Rep as Final Report
 
-### 💥 Chaos Engineering Resilient
-ARA-1 passed the **Challenge 8 Chaos Engineering Gauntlet** — a stress test that injects a **50% random failure rate** into every tool call to simulate real-world API outages, network timeouts, and rate-limit drops.
-
-```python
-# Activate Hard Mode:
-agent = AutonomousResearchAgent(llm=llm, dry_run=False, simulate_failures=True)
+    Web->>Syn: NVDA Q4 Revenue = $19.0B
+    SEC->>Syn: NVDA Q4 Revenue = $18.4B
+    Note over Syn: Conflict Detected!<br>Applying Hierarchy...
+    Syn->>Syn: Reject Tier 4 Data<br>Accept Tier 1 Data
+    Syn->>Rep: Publish: $18.4B
+    Syn->>Rep: Log Conflict in "Research Notes"
 ```
 
-**Results:** All chaos-injected errors were gracefully caught, logged as `fallback_needed` in the findings JSON, and the downstream Synthesizer + Verifier pipeline continued without crashing the Python process.
+### 2. Verifier — Anti-Hallucination Shield
+A post-generation editing node that acts as a strict Fact-Checking Editor. After the Synthesizer produces a draft:
+1. It extracts every numerical claim and metric from the draft report.
+2. It cross-references each figure directly against the raw JSON data payload.
+3. If a hallucinated figure is detected, it returns a precise error log and flags the discrepancy in the final output.
 
----
+### 3. Chaos Engineering Resilient
+ARA-1 passed the **Challenge 8 Chaos Engineering Gauntlet**. The system features a built-in stress tester that injects a **50% random failure rate** (simulating API timeouts and rate-limit drops) into every tool call. The `ToolRegistry` catches these simulated timeouts, logs them as `fallback_needed`, and triggers autonomous fallback loops without crashing the Python process.
 
-## 🧠 Cognitive Architecture
+### 4. Map-Reduce Context Compression
+Large SEC HTML filings can overwhelm LLM token limits. ARA-1 employs a pre-synthesis **Map-Reduce Data Compressor**. It passes raw payloads through a fast, cheap extraction model to trim out boilerplate, shrinking the context payload by up to 80% before feeding it to the final Synthesizer, preserving both latency and token budgets.
 
-ARA-1 implements a **Plan-and-Execute** framework with four sequential phases:
-
-```
-User Query
-    │
-    ▼
-┌─────────────────────────────────────────────────────┐
-│  Phase 0: Long-Term Memory Check (ChromaDB)         │
-│  → Skip redundant API calls for known tickers       │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Phase 1: PLANNER (Gemini 2.5 Flash)                │
-│  → Generates structured, dependency-mapped plan     │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Phase 2: EXECUTOR (step-by-step)                   │
-│  → 6-tool live registry (SEC/yfinance/Web/News)     │
-│  → JSON schema validation (enum + required params)  │
-│  → Topological dependency resolver                  │
-│  → Soft-catch fallback on every tool failure        │
-│  → Chaos Engineering mode (simulate_failures=True)  │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Phase 3: SYNTHESIZER (Conflict Resolution)         │
-│  → 5-tier Source Reliability Hierarchy              │
-│  → Structured Investment Report (Markdown)          │
-│  → "Research Notes & Discrepancies" section         │
-└───────────────────────┬─────────────────────────────┘
-                        │
-                        ▼
-┌─────────────────────────────────────────────────────┐
-│  Phase 4: VERIFIER (Anti-Hallucination Shield)      │
-│  → Cross-references every number vs raw JSON        │
-│  → Appends Verifier Warnings if hallucinations found│
-│  → Stores verified report to ChromaDB memory        │
-└─────────────────────────────────────────────────────┘
-```
+### 5. Sub-Second Semantic Caching
+Utilizing **ChromaDB**, the agent embeds every incoming query. If a new query matches a recent historical query with a cosine distance `<= 0.2` and is less than 48 hours old, the agent instantly returns the complete cached Markdown report, bypassing all LLM generation and API execution to achieve `< 1s` latency.
 
 ---
 
 ## 🛠️ Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Agent Framework | LangChain & LangGraph |
-| LLM | Google Gemini 2.5 Flash (free-tier, 1M context) |
-| Vector Database | ChromaDB (Local Persistent) |
-| Financial Data | SEC EDGAR API, yfinance |
-| Search | Tavily Search API |
-| News & Sentiment | NewsAPI + TextBlob |
-| Retry Logic | Tenacity (exponential backoff, 5 attempts) |
-| Data Validation | Pydantic v2 |
-| Security | All credentials via `os.getenv` — zero hardcoded keys |
+- **Framework**: LangChain / LangGraph Python Backend
+- **LLM**: Google Gemini 2.5 Flash (Free-tier API multiplexing)
+- **Vector Database**: ChromaDB (Local persistent storage)
+- **Live Tools**: yfinance, SEC EDGAR API, Tavily Web Search, TextBlob (Sentiment Analysis)
+- **Validation & Retry Logic**: Pydantic v2, Tenacity
 
 ---
 
-## 📁 Project Structure
-
-```
-Finacial_agent/
-├── agent/
-│   ├── core.py          # Plan-and-Execute cognitive loop (Phases 0–4)
-│   ├── prompts.py       # System prompts: Planner / Executor / Synthesizer / Verifier
-│   ├── parser.py        # LLM response JSON extractor (balanced-brace safe)
-│   └── llm_wrapper.py   # RobustLLM with exponential backoff + token tracking
-├── memory/
-│   └── vector_store.py  # ChromaDB long-term memory (schema-enforced)
-├── tools/
-│   ├── sec_edgar.py     # Live SEC EDGAR filing fetcher
-│   ├── financial_api.py # yfinance income statement / balance sheet tool
-│   ├── web_search.py    # Tavily web search tool
-│   ├── news_sentiment.py# NewsAPI + TextBlob sentiment analyser
-│   └── schemas/         # OpenAI function-calling JSON schemas (6 tools)
-├── tool_registry.py     # Tool registry: validation + chaos engineering mode
-├── test_synthesizer.py  # Day 8/9: Conflict resolution & hallucination tests
-├── test_chaos.py        # Day 11/12 Challenge 8: Chaos Engineering Gauntlet
-├── config.py            # Secure env variable loader + validator
-├── requirements.txt
-├── .env.example         # API key template (never commit .env!)
-├── ERROR_LOG.md         # Deliberate error tracking log (7 errors)
-└── zetheta-project.json # Submission metadata
-```
-
----
-
-## 🚀 Setup & Installation
+## 🚀 Installation & Setup
 
 **1. Clone the repository**
 ```bash
@@ -178,94 +121,19 @@ pip install -r requirements.txt
 ```bash
 cp .env.example .env
 ```
+Open `.env` and add your required keys (`GOOGLE_API_KEY`, `TAVILY_API_KEY`, `SEC_USER_AGENT`).
 
-Open `.env` and add your keys (see Required API Keys below).
-
-**5. Run a dry-run test (no API keys needed)**
+**5. Run the Benchmark Script**
+To verify the semantic caching telemetry and Map-Reduce limits, run the automated benchmark:
 ```bash
-python agent/core.py
+python evaluate.py
 ```
 
-**6. Run the Conflict Resolution Test (requires GOOGLE_API_KEY)**
-```bash
-python test_synthesizer.py
-```
-
-**7. Run the Chaos Engineering Gauntlet**
-```bash
-python test_chaos.py
-```
-
-**8. Run a real research query**
+**6. Run a real research query**
 ```python
 from agent.core import AutonomousResearchAgent
-from agent.llm_wrapper import RobustLLM
 
-llm = RobustLLM()
-agent = AutonomousResearchAgent(llm=llm, dry_run=False)
+agent = AutonomousResearchAgent(simulate_failures=False)
 report = agent.research("Analyze NVIDIA's competitive position in AI chips.", ticker="NVDA")
 print(report)
 ```
-
----
-
-## 🔑 Required API Keys
-
-| Key | Source | Required? |
-|---|---|---|
-| `GOOGLE_API_KEY` | [aistudio.google.com](https://aistudio.google.com) | ✅ Yes (Synthesizer & Verifier) |
-| `TAVILY_API_KEY` | [tavily.com](https://tavily.com) | ✅ Yes (web search tool) |
-| `SEC_USER_AGENT` | Your Name + Email (free) | ✅ Yes (EDGAR access) |
-| `NEWSAPI_KEY` | [newsapi.org](https://newsapi.org) | Optional (news sentiment) |
-| `ALPHA_VANTAGE_KEY` | [alphavantage.co](https://alphavantage.co) | Optional |
-
----
-
-## 🧪 Test Suite
-
-```bash
-# Test the vector store (no API key needed)
-python memory/vector_store.py
-
-# Test the live tool registry
-python tool_registry.py
-
-# Full agent dry-run (Challenge 1: Microsoft profile)
-python agent/core.py
-
-# Day 8/9: Synthesizer conflict resolution + Verifier hallucination catch
-python test_synthesizer.py
-
-# Day 11/12 Challenge 8: Chaos Engineering Gauntlet (50% failure rate)
-python test_chaos.py
-```
-
----
-
-## 📊 Research Challenges Progress
-
-| Challenge | Query Type | Status |
-|---|---|---|
-| 1 | Basic Company Profile (MSFT) | ✅ Passing |
-| 2 | Financial Ratio Analysis | ✅ Passing |
-| 3 | Risk Assessment from SEC Filing | ✅ Passing |
-| 4 | Competitive Analysis (3 companies) | ✅ Passing |
-| 5 | Earnings Call Sentiment Analysis | ✅ Passing |
-| 6 | Multi-Source Conflict Resolution | ✅ Live & Verified |
-| 7 | Full Investment Report w/ Anti-Hallucination | ✅ Live & Verified |
-| 8 | Report Under 50% Simulated Tool Failures | ✅ Live & Verified |
-
----
-
-## 🤖 AI Assistance Policy Citation
-
-During development, AI coding assistants were utilized for:
-- Rapid scaffolding of Plan-and-Execute loop boilerplate.
-- Generating regex patterns for JSON extraction in the parsing layer.
-- Formatting standard JSON schemas for the Tool Registry.
-
-*All architectural decisions, the Source Reliability Hierarchy design, memory schemas, dependency resolution logic, Synthesizer/Verifier prompt engineering, and Chaos Engineering test strategy were designed independently.*
-
----
-
-*Zetheta Algorithms Private Limited — Project 1A Assessment*

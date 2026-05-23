@@ -13,8 +13,10 @@ import logging
 import os
 import sys
 import uuid
+import time
 from datetime import datetime
 from typing import Optional
+from langchain_core.messages import HumanMessage
 
 # Ensure project root is on path for relative imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -34,6 +36,41 @@ logger = logging.getLogger("ARA-1")
 # Max iterations to prevent infinite loops
 MAX_ITERATIONS = int(os.getenv("MAX_ITERATIONS", 15))
 
+
+def compress_data(raw_data: list, query: str, llm) -> list:
+    """
+    Compresses massive raw text blocks by extracting only query-relevant facts.
+    This acts as a 'Map' step to save tokens before the final 'Reduce' (Synthesis).
+    """
+    compressed_data = []
+    
+    for item in raw_data:
+        # If the data is already small (like a short JSON metric), keep it as is
+        content_str = str(item)
+        if len(content_str) < 1500:
+            compressed_data.append(item)
+            continue
+            
+        logger.info(f"Compressing large data payload (Length: {len(content_str)} characters)...")
+        
+        # Use a fast, cheap prompt to extract only what matters
+        compression_prompt = f"""
+        You are a data extraction tool. Extract only the bullet points relevant to this query: "{query}".
+        Ignore boilerplate, HTML leftovers, and irrelevant information. Be extremely concise.
+        
+        Raw Text:
+        {content_str[:15000]} # Truncate safely for the mini-model
+        """
+        
+        try:
+            # Note: We use the same llm wrapper, but the prompt is tiny!
+            summary = llm.generate([HumanMessage(content=compression_prompt)])
+            compressed_data.append({"source_type": item.get("source_type", item.get("tool", "Unknown")), "extracted_facts": summary})
+        except Exception as e:
+            logger.warning(f"Compression failed, passing raw data: {e}")
+            compressed_data.append(item) # Fallback to raw data if compression fails
+            
+    return compressed_data
 
 class AutonomousResearchAgent:
     """
@@ -64,6 +101,42 @@ class AutonomousResearchAgent:
     # ------------------------------------------------------------------
     # PHASE 0: Pre-flight memory check
     # ------------------------------------------------------------------
+    def _check_semantic_cache(self, query: str, ticker: Optional[str] = None) -> Optional[str]:
+        """
+        Checks if an exact or highly similar report from the last 48 hours exists in memory.
+        Returns the cached full report if found, else None.
+        """
+        conditions = [
+            {"source_type": "agent_report"},
+            {"timestamp": {"$gte": int(time.time()) - 172800}}
+        ]
+        if ticker:
+            conditions.append({"ticker": ticker})
+            
+        where_clause = {"$and": conditions} if len(conditions) > 1 else conditions[0]
+        
+        try:
+            results = self.memory.collection.query(
+                query_texts=[query],
+                n_results=1,
+                where=where_clause
+            )
+        except Exception as e:
+            logger.warning(f"Cache check failed: {e}")
+            return None
+
+        distances = results.get("distances", [[]])[0]
+        metadatas = results.get("metadatas", [[]])[0]
+        
+        if distances and len(distances) > 0:
+            if distances[0] <= 0.2:
+                cached_report = metadatas[0].get("full_report")
+                if cached_report:
+                    logger.info(f"Semantic Cache Hit! Found highly similar recent report for '{query}'.")
+                    return cached_report
+                    
+        return None
+
     def _check_long_term_memory(self, query: str, ticker: Optional[str] = None) -> Optional[str]:
         """
         Checks if the agent has already researched this topic recently.
@@ -214,7 +287,11 @@ Respond in JSON:"""
         logger.info("--- PHASE 3: SYNTHESIZING DATA ---")
         
         # 1. Format the gathered data into a readable string for the LLM
-        raw_data_string = json.dumps(findings, indent=2)
+        if self.llm:
+            compressed_findings = compress_data(findings, query, self.llm)
+        else:
+            compressed_findings = findings
+        raw_data_string = json.dumps(compressed_findings, indent=2)
 
         if self.dry_run:
             logger.info("[DRY RUN] Generating mock synthesis report.")
@@ -288,7 +365,7 @@ Respond in JSON:"""
     # ------------------------------------------------------------------
     # MAIN ENTRY POINT
     # ------------------------------------------------------------------
-    def research(self, query: str, ticker: Optional[str] = None) -> str:
+    def research(self, query: str, ticker: Optional[str] = None) -> dict:
         """
         Main research method. Runs the full Plan-and-Execute loop.
         
@@ -297,11 +374,17 @@ Respond in JSON:"""
             ticker: Optional ticker symbol for memory filtering.
         
         Returns:
-            A formatted investment research report as a string.
+            A dictionary containing the report and telemetry data.
         """
         logger.info(f"=== ARA-1 Research Session Started: {self.session_id} ===")
         logger.info(f"Query: {query}")
         self._current_ticker = ticker  # make ticker available to _run_planner
+
+        # Semantic Cache Check
+        cached_report = self._check_semantic_cache(query, ticker)
+        if cached_report:
+            logger.info("Returning cached report from long-term memory (0 API calls, 0 tool failures, <1 second latency).")
+            return {"report": cached_report, "from_cache": True, "tool_calls_made": []}
 
         # Phase 0: Check long-term memory
         prior_knowledge = self._check_long_term_memory(query, ticker)
@@ -311,7 +394,7 @@ Respond in JSON:"""
         # Phase 1: Generate Plan
         plan = self._run_planner(query)
         if not plan:
-            return "ERROR: Agent failed to generate a research plan. Please try again."
+            return {"report": "ERROR: Agent failed to generate a research plan. Please try again.", "from_cache": False, "tool_calls_made": []}
 
         logger.info(f"Plan generated: {len(plan['steps'])} steps.")
 
@@ -373,22 +456,24 @@ Respond in JSON:"""
             report += f"\n\n## Verifier Warnings\nThe following potential errors/hallucinations were detected and require human review:\n" + "\n".join([f"- {e}" for e in verification["errors"]])
 
         # Store key findings in long-term memory
-        if ticker:
-            self.memory.store_finding(
-                doc_id=f"{ticker.lower()}-{self.session_id}",
-                content=report[:2000],  # Store the first 2000 chars of the report
-                metadata={
-                    "ticker": ticker,
-                    "source_type": "agent_report",
-                    "date": datetime.now().strftime("%Y-%m-%d"),
-                    "confidence": 0.85,
-                    "researcher_session": self.session_id,
-                    "verified": False
-                }
-            )
+        safe_ticker = ticker if ticker else "unknown"
+        self.memory.store_finding(
+            doc_id=f"{safe_ticker.lower()}-{self.session_id}",
+            content=query,  # Store the original query to enable Query-to-Query similarity matching
+            metadata={
+                "ticker": safe_ticker,
+                "source_type": "agent_report",
+                "date": datetime.now().strftime("%Y-%m-%d"),
+                "confidence": 0.85,
+                "researcher_session": self.session_id,
+                "verified": False,
+                "full_report": report,
+                "timestamp": int(time.time())
+            }
+        )
 
         logger.info("=== Research Complete ===")
-        return report
+        return {"report": report, "from_cache": False, "tool_calls_made": findings}
 
 
 # ------------------------------------------------------------------
@@ -396,10 +481,10 @@ Respond in JSON:"""
 # ------------------------------------------------------------------
 if __name__ == "__main__":
     agent = AutonomousResearchAgent(dry_run=True)
-    report = agent.research(
+    result = agent.research(
         query="Generate a company profile for Microsoft Corporation.",
         ticker="MSFT"
     )
     print("\n" + "="*60)
-    print(report)
+    print(result["report"])
     print("="*60)
