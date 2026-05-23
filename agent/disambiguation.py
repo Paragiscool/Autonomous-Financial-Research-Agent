@@ -1,3 +1,1 @@
-"""
-Placeholder module for architectural compliance.
-"""
+"""Placeholder for architectural compliance."""

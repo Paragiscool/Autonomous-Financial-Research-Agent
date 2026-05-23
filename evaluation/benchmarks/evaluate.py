@@ -21,7 +21,9 @@ if sys.stdout.encoding != 'utf-8':
     sys.stdout.reconfigure(encoding='utf-8')
 
 from dotenv import load_dotenv
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+# We are in evaluation/benchmarks, project root is two levels up
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, project_root)
 load_dotenv()
 
 from agent.core import AutonomousResearchAgent
@@ -41,8 +43,8 @@ TEST_QUERIES = [
 ]
 
 RUN_LABEL = f"baseline-{datetime.now().strftime('%Y%m%d-%H%M%S')}"
-OUTPUT_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "evaluation", "benchmarks")
-EPISODIC_STORE = os.path.join(os.path.dirname(os.path.abspath(__file__)), "episodic_memory.jsonl")
+OUTPUT_DIR = os.path.dirname(os.path.abspath(__file__))
+EPISODIC_STORE = os.path.join(project_root, "episodic_memory.jsonl")
 
 
 def run_benchmark():

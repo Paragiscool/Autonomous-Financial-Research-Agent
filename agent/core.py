@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from agent.prompts import PLANNER_SYSTEM_PROMPT, EXECUTOR_SYSTEM_PROMPT, SYNTHESIZER_PROMPT
 from agent.parser import parse_plan, parse_executor_response
-from tool_registry import ToolRegistry
+from tools.tool_registry import ToolRegistry
 from memory.vector_store import LongTermMemory
 
 # Configure rich logging
