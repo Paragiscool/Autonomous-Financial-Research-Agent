@@ -1,9 +1,19 @@
 import os
 import json
 import requests
+import requests_cache
 from bs4 import BeautifulSoup
 from dotenv import load_dotenv
 import logging
+
+# Optimization 2: HTTP-layer cache for SEC EDGAR.
+# If the agent retries a failed SEC call (same URL within 1 hour), the second
+# request is served from local SQLite — zero network round-trip.
+requests_cache.install_cache(
+    "sec_edgar_cache",
+    expire_after=3600,
+    allowable_codes=[200],
+)
 
 # Load the User-Agent from .env
 load_dotenv()
@@ -76,13 +86,21 @@ class SecEdgarTool:
             soup = BeautifulSoup(doc_response.content, "html.parser")
             clean_text = soup.get_text(separator="\n", strip=True)
 
-            # 5. Truncate to prevent context overflow (returning the first ~25k characters of MD&A/Risk Factors)
-            return json.dumps({
+            # Optimization 1: Payload slicing — hard cap at 8k chars (vs old 25k).
+            # The synthesizer only needs the key Risk Factors / MD&A sections.
+            # Strip lines that are purely whitespace or single-char noise.
+            lines = [l for l in clean_text.splitlines() if len(l.strip()) > 2]
+            trimmed_text = "\n".join(lines[:600])  # ~600 meaningful lines ≈ 8k chars
+
+            # Optimization 1b: Strip empty metadata fields before serialisation.
+            payload = {
                 "ticker": ticker,
                 "filing_type": filing_type,
                 "date": filing_dates[target_index],
-                "content_snippet": clean_text[:25000] + "\n...[CONTENT TRUNCATED FOR CONTEXT LIMITS]..."
-            })
+                "content_snippet": trimmed_text + "\n...[CONTENT TRUNCATED FOR CONTEXT LIMITS]..."
+            }
+            clean_payload = {k: v for k, v in payload.items() if v is not None and str(v).strip() != ""}
+            return json.dumps(clean_payload)
 
         except requests.exceptions.RequestException as e:
             logger.error(f"SEC API Error for {ticker}: {e}")

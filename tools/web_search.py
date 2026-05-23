@@ -1,10 +1,21 @@
 import os
 import json
 import requests
+import requests_cache
 import logging
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Optimization 2: HTTP-layer cache for Tavily web search.
+# Identical search queries within 30 minutes return from local SQLite cache
+# instead of burning Tavily API quota. Especially valuable during agent retries.
+requests_cache.install_cache(
+    "web_search_cache",
+    expire_after=1800,     # 30-min TTL (news is more time-sensitive than SEC filings)
+    allowable_codes=[200],
+)
+
 logger = logging.getLogger(__name__)
 
 class WebSearchTool:
@@ -34,17 +45,24 @@ class WebSearchTool:
             response.raise_for_status()
             data = response.json()
 
-            # Extract only the essential fields to prevent token bloat
+            # Optimization 1: Payload slicing — cap at top 5 results max, then
+            # strip any empty fields per article so the LLM sees only signal.
+            raw_results = data.get("results", [])
+            sliced = raw_results[:5]  # Hard cap: LLM rarely needs more than 5 sources
+
             extracted_results = []
-            for item in data.get("results", []):
-                extracted_results.append({
-                    "title": item.get("title"),
-                    "source": item.get("url"),
-                    "snippet": item.get("content")
-                })
+            for item in sliced:
+                article = {
+                    "title":   item.get("title"),
+                    "source":  item.get("url"),
+                    "snippet": item.get("content"),
+                }
+                # Drop keys with None or blank values before appending
+                article = {k: v for k, v in article.items() if v is not None and str(v).strip() != ""}
+                extracted_results.append(article)
 
             return json.dumps({
-                "query": query,
+                "query":   query,
                 "results": extracted_results
             })
 

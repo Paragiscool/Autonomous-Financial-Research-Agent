@@ -1,0 +1,109 @@
+{
+  "run_label": "baseline-20260523-152321",
+  "run_timestamp": "2026-05-23T09:53:49.645394Z",
+  "total_run_time_s": 54.44,
+  "total_queries": 5,
+  "successful_queries": 5,
+  "failed_queries": 0,
+  "cache_hit_queries": 1,
+  "success_rate": 1.0,
+  "cache_utilisation_ratio": 0.2,
+  "avg_latency_s": 10.886,
+  "min_latency_s": 0.427,
+  "max_latency_s": 36.359,
+  "total_tool_calls": 12,
+  "total_tool_successes": 7,
+  "total_tool_failures": 5,
+  "tool_success_rate": 0.5833,
+  "targets": {
+    "success_rate_target": 0.8,
+    "success_rate_met": true,
+    "cache_ratio_target": 0.2,
+    "cache_ratio_met": true,
+    "tool_success_rate_target": 0.7,
+    "tool_success_rate_met": false
+  },
+  "per_query": [
+    {
+      "index": 1,
+      "query": "What is Microsoft's (MSFT) Q3 revenue?",
+      "status": "success",
+      "elapsed_s": 36.359,
+      "from_cache": false,
+      "step_count": 3,
+      "tools_used": [
+        "company_profile",
+        "financial_data_api",
+        "sec_filing_search"
+      ],
+      "tool_success_count": 1,
+      "tool_failure_count": 2,
+      "report_length_chars": 1515,
+      "error_message": ""
+    },
+    {
+      "index": 2,
+      "query": "Summarize the risk factors from Apple's (AAPL) latest 10-K.",
+      "status": "success",
+      "elapsed_s": 11.951,
+      "from_cache": false,
+      "step_count": 3,
+      "tools_used": [
+        "company_profile",
+        "financial_data_api",
+        "sec_filing_search"
+      ],
+      "tool_success_count": 2,
+      "tool_failure_count": 1,
+      "report_length_chars": 1517,
+      "error_message": ""
+    },
+    {
+      "index": 3,
+      "query": "What is the latest market sentiment regarding Tesla's (TSLA) robotaxi?",
+      "status": "success",
+      "elapsed_s": 2.424,
+      "from_cache": false,
+      "step_count": 3,
+      "tools_used": [
+        "company_profile",
+        "financial_data_api",
+        "sec_filing_search"
+      ],
+      "tool_success_count": 2,
+      "tool_failure_count": 1,
+      "report_length_chars": 1528,
+      "error_message": ""
+    },
+    {
+      "index": 4,
+      "query": "What is Microsoft's (MSFT) Q3 revenue?",
+      "status": "cache_hit",
+      "elapsed_s": 0.427,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1515,
+      "error_message": ""
+    },
+    {
+      "index": 5,
+      "query": "Compare NVIDIA's (NVDA) data center growth with their latest news announcements.",
+      "status": "success",
+      "elapsed_s": 3.268,
+      "from_cache": false,
+      "step_count": 3,
+      "tools_used": [
+        "company_profile",
+        "financial_data_api",
+        "sec_filing_search"
+      ],
+      "tool_success_count": 2,
+      "tool_failure_count": 1,
+      "report_length_chars": 1538,
+      "error_message": ""
+    }
+  ]
+}

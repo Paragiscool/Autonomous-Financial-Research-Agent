@@ -1,0 +1,93 @@
+{
+  "run_label": "baseline-20260523-153641",
+  "run_timestamp": "2026-05-23T10:06:43.424434Z",
+  "total_run_time_s": 3.66,
+  "total_queries": 5,
+  "successful_queries": 5,
+  "failed_queries": 0,
+  "cache_hit_queries": 5,
+  "success_rate": 1.0,
+  "cache_utilisation_ratio": 1.0,
+  "avg_latency_s": 0.729,
+  "min_latency_s": 0.583,
+  "max_latency_s": 1.106,
+  "total_tool_calls": 0,
+  "total_tool_successes": 0,
+  "total_tool_failures": 0,
+  "tool_success_rate": 0.0,
+  "targets": {
+    "success_rate_target": 0.8,
+    "success_rate_met": true,
+    "cache_ratio_target": 0.2,
+    "cache_ratio_met": true,
+    "tool_success_rate_target": 0.7,
+    "tool_success_rate_met": false
+  },
+  "per_query": [
+    {
+      "index": 1,
+      "query": "What is Microsoft's (MSFT) Q3 revenue?",
+      "status": "cache_hit",
+      "elapsed_s": 1.106,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1515,
+      "error_message": ""
+    },
+    {
+      "index": 2,
+      "query": "Summarize the risk factors from Apple's (AAPL) latest 10-K.",
+      "status": "cache_hit",
+      "elapsed_s": 0.682,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1517,
+      "error_message": ""
+    },
+    {
+      "index": 3,
+      "query": "What is the latest market sentiment regarding Tesla's (TSLA) robotaxi?",
+      "status": "cache_hit",
+      "elapsed_s": 0.583,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1528,
+      "error_message": ""
+    },
+    {
+      "index": 4,
+      "query": "What is Microsoft's (MSFT) Q3 revenue?",
+      "status": "cache_hit",
+      "elapsed_s": 0.591,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1515,
+      "error_message": ""
+    },
+    {
+      "index": 5,
+      "query": "Compare NVIDIA's (NVDA) data center growth with their latest news announcements.",
+      "status": "cache_hit",
+      "elapsed_s": 0.682,
+      "from_cache": true,
+      "step_count": 0,
+      "tools_used": [],
+      "tool_success_count": 0,
+      "tool_failure_count": 0,
+      "report_length_chars": 1538,
+      "error_message": ""
+    }
+  ]
+}
