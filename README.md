@@ -23,6 +23,44 @@ graph TD
 ### 2. The Technical Architecture (LangGraph State Machine)
 *The actual engineering backbone controlling the agent's cognitive loops.*
 
+#### Option A: Advanced Engineering View (Full Node Telemetry & Chaos Injector)
+```mermaid
+graph TD
+    %% Define Node Styles
+    classDef user fill:#2d3436,stroke:#dfe6e9,stroke-width:2px,color:#fff;
+    classDef memory fill:#0984e3,stroke:#74b9ff,stroke-width:2px,color:#fff;
+    classDef core fill:#6c5ce7,stroke:#a29bfe,stroke-width:2px,color:#fff;
+    classDef tools fill:#00b894,stroke:#55efc4,stroke-width:2px,color:#fff;
+    classDef chaos fill:#d63031,stroke:#ff7675,stroke-width:2px,color:#fff;
+    classDef final fill:#e84393,stroke:#fd79a8,stroke-width:2px,color:#fff;
+
+    %% Graph Flow
+    A[User Query]:::user --> B{Semantic Cache <br> ChromaDB}:::memory
+    B -- Hit < 0.2 dist --> Z[Return Cached Report < 1s]:::final
+    B -- Miss / Expired --> C[Planner Node]:::core
+    
+    C --> D[Executor Node]:::core
+    D <--> E{Tool Registry <br> with Chaos Injector}:::chaos
+    
+    %% Tools
+    E -->|Route| T1[SEC EDGAR API]:::tools
+    E -->|Route| T2[yfinance API]:::tools
+    E -->|Route| T3[Tavily Web Search]:::tools
+    E -->|Route| T4[TextBlob NLP]:::tools
+    
+    %% Loop back
+    E -- 50% Simulated Failure --> D
+    
+    D -- All Steps Complete --> F[Map-Reduce <br> Data Compressor]:::core
+    F --> G[Synthesizer Node]:::core
+    G --> H{Verifier Node <br> Anti-Hallucination}:::core
+    
+    H -- Hallucination Detected --> G
+    H -- Verified True --> I[Save to ChromaDB]:::memory
+    I --> J[Final Verified Markdown]:::final
+```
+
+#### Option B: Simplified State Machine View
 ```mermaid
 graph TD
     %% Define Styles
